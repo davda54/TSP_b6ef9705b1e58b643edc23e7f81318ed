@@ -333,3 +333,7 @@ cmake-build-debug/
 .idea/
 CMakeLists.txt
 CMakeLists.txt___jb_old___
+
+*.sln
+*.vcxproj
+*.vcxproj.filters
