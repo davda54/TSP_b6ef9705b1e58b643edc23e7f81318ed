@@ -7,7 +7,13 @@
 
 #include <array>
 #include <vector>
-#include <bits/unordered_map.h>
+#include <unordered_map>
+
+
+typedef int city_id;
+typedef int cluster_id;
+typedef int cost;
+const cost INVALID_ROUTE = INT_MAX;
 
 class data {
 
@@ -75,7 +81,7 @@ return 0;
         return 0;
     }
 
-    void print_path(const std::array<int>& path) const {
+    void print_path(const std::vector<int>& path) const {
 
 
 
