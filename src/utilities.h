@@ -1,0 +1,10 @@
+//
+// Created by tomiinek on 11.10.18.
+//
+
+#ifndef TSP_CHALLENGE_KIWI_UTILITIES_H
+#define TSP_CHALLENGE_KIWI_UTILITIES_H
+
+
+
+#endif //TSP_CHALLENGE_KIWI_UTILITIES_H
