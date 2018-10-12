@@ -3,6 +3,6 @@
 #include "generator.h"
 
 int main() {
-    std::cout << "Hello, World!" << a << std::endl;
+    std::cout << "Hello, World!" << std::endl;
     return 0;
 }

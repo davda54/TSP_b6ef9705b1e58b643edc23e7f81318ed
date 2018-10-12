@@ -10,9 +10,9 @@
 #include <unordered_map>
 
 
-typedef int city_id;
-typedef int cluster_id;
-typedef int cost;
+using city_id = int;
+using cluster_id = int;
+using cost = int;
 const cost INVALID_ROUTE = INT_MAX;
 
 class data {
