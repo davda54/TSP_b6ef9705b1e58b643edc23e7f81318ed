@@ -2,20 +2,22 @@
 #define TSP_CHALLENGE_KIWI_VALIDATOR_H
 
 #include <vector>
-#include "data.h"
+#include "task.h"
 
 const int N = 300;
 
 class validator {
 public:
-	cost find_best_route(city_id start, const std::vector<cluster_id>& clusters);
-	bool exist_route(city_id start, const std::vector<cluster_id>& clusters);
+	cost_t find_best_route(city_id_t start, const std::vector<cluster_id_t> &clusters);
+
+	bool exist_route(city_id_t start, const std::vector<cluster_id_t> &clusters);
 	
 private:
-	data& _data;
+	task &_data;
 
-	cost find_best_route(city_id start, const std::vector<cluster_id>& clusters, size_t cluster_index);
-	bool exist_route(city_id start, const std::vector<cluster_id>& clusters, size_t day);
+	cost_t find_best_route(city_id_t start, const std::vector<cluster_id_t> &clusters, size_t cluster_index);
+
+	bool exist_route(city_id_t start, const std::vector<cluster_id_t> &clusters, size_t day);
 };
 
 

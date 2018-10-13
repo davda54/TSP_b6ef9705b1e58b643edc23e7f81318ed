@@ -9,9 +9,9 @@
 #include <tuple>
 
 using city_id_t = int;
-using clstr_id_t = int;
+using cluster_id_t = int;
 using cost_t = unsigned short;
-const cost_t NO_COST = 	65535;
+const cost_t INVALID_ROUTE = 65535;
 
 class task {
 
@@ -31,7 +31,7 @@ public:
         for (int i = 0; i < _n; ++i) {
 
             input >> cluster_name;
-            auto cluster_id = (clstr_id_t) _cluster_names.size();
+            auto cluster_id = (cluster_id_t) _cluster_names.size();
             _cluster_names.push_back(cluster_name);
 
             // twice as the first getline returns empty string (no why) TODO: parse without getline
@@ -57,7 +57,7 @@ public:
             std::vector<std::vector<cost_t>> b;
             b.reserve(cities_count);
             for (int i = 0; i < cities_count; ++i) {
-                std::vector<cost_t> c(cities_count, NO_COST);
+                std::vector<cost_t> c(cities_count, INVALID_ROUTE);
                 b.push_back(c);
             }
             _graph.push_back(b);
@@ -82,7 +82,7 @@ public:
         _start = _city_names[city_identifiers_mapping.find(start_identifier)->second].second;
     }
 
-    const std::vector<city_id_t>& get_cluster_cities(clstr_id_t cluster) const {
+    const std::vector<city_id_t> &get_cluster_cities(cluster_id_t cluster) const {
         return _clusters[cluster];
     }
 
@@ -90,7 +90,7 @@ public:
         std::vector<std::tuple<city_id_t, cost_t >> edges;
         auto& city_paths = _graph[day - 1][city];
         for (int i = 0; i < _n; ++i) {
-            if (city_paths[i] != NO_COST) edges.push_back(std::make_tuple(i, city_paths[i]));
+            if (city_paths[i] != INVALID_ROUTE) edges.push_back(std::make_tuple(i, city_paths[i]));
         }
         return edges;
     }
@@ -103,7 +103,7 @@ public:
         return _n;
     }
 
-    clstr_id_t get_start() const {
+    cluster_id_t get_start() const {
         return _start;
     }
 
@@ -129,7 +129,7 @@ private:
     std::vector<std::vector<std::vector<cost_t>>> _graph;
 
     std::vector<std::vector<city_id_t >> _clusters;
-    std::vector<std::pair<std::string, clstr_id_t >> _city_names;
+    std::vector<std::pair<std::string, cluster_id_t >> _city_names;
     std::vector<std::string> _cluster_names;
 
 };

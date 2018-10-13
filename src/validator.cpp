@@ -3,21 +3,20 @@
 using namespace std;
 
 
-int validator::find_best_route(city_id start, const std::vector<cluster_id>& clusters)
+cost_t validator::find_best_route(city_id_t start, const std::vector<cluster_id_t> &clusters)
 {
 	return find_best_route(start, clusters, 0);
 }
 
-bool validator::exist_route(city_id start, const std::vector<cluster_id>& clusters)
+bool validator::exist_route(city_id_t start, const std::vector<cluster_id_t> &clusters)
 {
 	return exist_route(start, clusters, 0);
 }
 
 // todo: rewrite to a dynamic programming solution
 
-bool validator::exist_route(city_id start, const std::vector<cluster_id>& clusters, size_t day)
-{
-	vector<city_id> cities = _data.get_cluster_cities(clusters[day + 1]);
+bool validator::exist_route(city_id_t start, const std::vector<cluster_id_t> &clusters, size_t day) {
+	vector<city_id_t> cities = _data.get_cluster_cities(clusters[day + 1]);
 
 	for (size_t i = 0; i < cities.size(); i++)
 	{
@@ -30,19 +29,18 @@ bool validator::exist_route(city_id start, const std::vector<cluster_id>& cluste
 }
 
 // todo: rewrite to a dynamic programming solution
-	
-cost validator::find_best_route(city_id start, const std::vector<cluster_id>& clusters, size_t day)
-{
-	vector<city_id> cities = _data.get_cluster_cities(clusters[day + 1]);
-	cost best_cost = INVALID_ROUTE;
+
+cost_t validator::find_best_route(city_id_t start, const std::vector<cluster_id_t> &clusters, size_t day) {
+	vector<city_id_t> cities = _data.get_cluster_cities(clusters[day + 1]);
+	cost_t best_cost = INVALID_ROUTE;
 
 	for (size_t i = 0; i < cities.size(); i++)
 	{
-		cost start_to_city = _data.get_cost(start, cities[i], day);
+		cost_t start_to_city = _data.get_cost(start, cities[i], day);
 		if (start_to_city == INVALID_ROUTE) continue;
 
-		cost remaining_cost = find_best_route(cities[i], clusters, day + 1);
-		cost total_cost = start_to_city + remaining_cost;
+		cost_t remaining_cost = find_best_route(cities[i], clusters, day + 1);
+		cost_t total_cost = start_to_city + remaining_cost;
 
 		if (total_cost < best_cost) best_cost = total_cost;
 	}
