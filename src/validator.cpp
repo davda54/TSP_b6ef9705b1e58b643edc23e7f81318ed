@@ -3,14 +3,14 @@
 using namespace std;
 
 
-cost_t validator::find_best_route(city_id_t start, const std::vector<cluster_id_t> &clusters)
+cost_t validator::find_best_route(const std::vector<cluster_id_t> &clusters)
 {
-	return find_best_route(start, clusters, 0);
+	return find_best_route(_start_city, clusters, 0);
 }
 
-bool validator::exist_route(city_id_t start, const std::vector<cluster_id_t> &clusters)
+bool validator::exist_route(const std::vector<cluster_id_t> &clusters)
 {
-	return exist_route(start, clusters, 0);
+	return exist_route(_start_city, clusters, 0);
 }
 
 // todo: rewrite to a dynamic programming solution
