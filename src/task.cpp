@@ -10,7 +10,7 @@ using namespace std;
 void task::load(istream& input)
 {
 	string start_identifier;
-	input >> _n >> start_identifier;
+	input >> _cluster_count >> start_identifier;
 
 	unordered_map<string, city_id_t> city_identifiers_mapping;
 
@@ -18,7 +18,7 @@ void task::load(istream& input)
 	string cities_line;
 	string city_name;
 
-	for (int i = 0; i < _n; ++i)
+	for (int i = 0; i < _cluster_count; ++i)
 	{
 		input >> cluster_name;
 		auto cluster_id = (cluster_id_t)_cluster_names.size();
@@ -43,8 +43,8 @@ void task::load(istream& input)
 
 	// TODO: udelej poradne!
 	size_t cities_count = _city_names.size();
-	_graph.reserve((size_t)_n);
-	for (int j = 0; j < _n; ++j)
+	_graph.reserve((size_t)_cluster_count);
+	for (int j = 0; j < _cluster_count; ++j)
 	{
 		vector<vector<cost_t>> b;
 		b.reserve(cities_count);
@@ -69,19 +69,20 @@ void task::load(istream& input)
 		// TODO: udelej poradne!
 		if (day == 0)
 		{
-			for (int i = 0; i < _n; ++i) _graph[i][from][to] = cost;
+			for (int i = 0; i < _cluster_count; ++i) _graph[i][from][to] = cost;
 		}
 		else _graph[day - 1][from][to] = cost;
 	}
 
-	_start = _city_names[city_identifiers_mapping.find(start_identifier)->second].second;
+	_start_city = city_identifiers_mapping.find(start_identifier)->second;
+	_start_cluster = _city_names[_start_city].second;
 }
 
 vector<tuple<city_id_t, cost_t>> task::get_edges(city_id_t city, int day) const
 {
 	vector<tuple<city_id_t, cost_t>> edges;
 	auto& city_paths = _graph[day - 1][city];
-	for (int i = 0; i < _n; ++i)
+	for (int i = 0; i < _cluster_count; ++i)
 	{
 		if (city_paths[i] != INVALID_ROUTE) edges.push_back(make_tuple(i, city_paths[i]));
 	}
@@ -90,21 +91,19 @@ vector<tuple<city_id_t, cost_t>> task::get_edges(city_id_t city, int day) const
 
 void task::print_path(const vector<city_id_t>& path, ostream& output) const
 {
-	output << '[';
-	bool first = true;
-	for (auto&& city : path)
+	for (size_t i = 0; i < _cluster_count; i++)
 	{
-		if (first) first = false;
-		else output << " --> ";
-		output << _city_names[city].first;
+		output << get_city_name(path[i]) << " ";
+		output << get_city_name(path[i + 1]) << " ";
+		output << i + 1 << " ";
+		output << get_cost(path[i], path[i + 1], i) << endl;
 	}
-	output << ']' << endl;
 }
 
 chrono::duration<int> task::get_available_time() const
 {
-	int clusters = get_number_of_clusters();
-	int airports = get_number_of_airports();
+	int clusters = cluster_count();
+	int airports = get_number_of_cities();
 
 	if (clusters <= 20 && airports < 50) return chrono::duration<int>(3);
 	if (clusters <= 100 && airports < 200) return chrono::duration<int>(5);

@@ -11,10 +11,12 @@ public:
 
 	explicit validator(const task& t) : _data(t)
 	{
-		_start_city = _data.get_start();
+		_start_city = _data.get_start_city();
 	}
 
-	cost_t find_best_route(const std::vector<cluster_id_t> &clusters);
+	std::vector<city_id_t> find_route(const std::vector<cluster_id_t> &clusters);
+
+	total_cost_t route_cost(const std::vector<cluster_id_t> &clusters);
 
 	bool exist_route(const std::vector<cluster_id_t> &clusters);
 	
@@ -22,7 +24,9 @@ private:
 	const task &_data;
 	city_id_t _start_city;
 
-	cost_t find_best_route(city_id_t start, const std::vector<cluster_id_t> &clusters, size_t cluster_index);
+	std::vector<city_id_t> find_route(city_id_t start, const std::vector<cluster_id_t> &clusters, size_t day);
+
+	total_cost_t route_cost(city_id_t start, const std::vector<cluster_id_t> &clusters, size_t day);
 
 	bool exist_route(city_id_t start, const std::vector<cluster_id_t> &clusters, size_t day);
 };

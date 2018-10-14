@@ -1,6 +1,6 @@
-#include <iostream>
+#include <string>
 #include <fstream>
-#include <chrono>
+#include <iostream>
 
 #include "task.h"
 #include "generator.h"
@@ -13,8 +13,8 @@ int main(int argc, char *argv[])
 {
 	auto start = chrono::steady_clock::now();
 
-    std::fstream f("../resources/TSALESMAN2-1.in");
-
+    std::ifstream f(argv[1]);
+		
     task t;
     t.load(f);
 
@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 
 		if(!v.exist_route(solution)) continue;
 
-		auto price = v.find_best_route(solution);
+		auto price = v.route_cost(solution);
 		if(price < best_price)
 		{
 			best_solution = solution;
@@ -39,5 +39,8 @@ int main(int argc, char *argv[])
 		}
 	}
 
-    std::cout << best_price;
+	auto route = v.find_route(best_solution);
+
+    std::cout << best_price << endl;
+	t.print_path(route, cout);
 }
