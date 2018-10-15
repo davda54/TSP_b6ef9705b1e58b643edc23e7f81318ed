@@ -1,9 +1,9 @@
 #include "generator.h"
-#include <random>
+#include <algorithm>
 
 using namespace std;
 
-vector<cluster_id_t> generator::generate_solution() const
+vector<cluster_id_t> generator::generate_solution()
 {
 	int n = _data.cluster_count();
 	cluster_id_t start_cluster = _data.get_start_cluster();
@@ -16,7 +16,7 @@ vector<cluster_id_t> generator::generate_solution() const
 	}
 	solution.push_back(start_cluster);
 
-	shuffle(solution.begin(), solution.end()-1, mt19937(random_device()()));
-
+	shuffle(solution.begin(), solution.end()-1, _random_engine);
+	
 	return solution;
 }
