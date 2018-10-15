@@ -14,7 +14,12 @@ int main(int argc, char *argv[])
 	auto start = chrono::steady_clock::now();
 
     std::ifstream f(argv[1]);
-		
+
+#ifdef _DEBUG
+	cout << "file: " << argv[1] << endl << endl;
+	size_t solution_count = 0;
+#endif
+
     task t;
     t.load(f);
 
@@ -29,6 +34,8 @@ int main(int argc, char *argv[])
 	{
 		auto solution = g.generate_solution();
 
+		solution_count++;
+		
 		if(!v.exist_route(solution)) continue;
 
 		auto price = v.route_cost(solution);
@@ -41,6 +48,9 @@ int main(int argc, char *argv[])
 
 	auto route = v.find_route(best_solution);
 
-    std::cout << best_price << endl;
+
+	cout << "solution count: " << solution_count << endl << endl;
+
+    cout << best_price << endl;
 	t.print_path(route, cout);
 }
