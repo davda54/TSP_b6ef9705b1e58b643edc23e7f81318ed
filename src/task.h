@@ -9,7 +9,9 @@ using city_id_t = int;
 using cluster_id_t = int;
 using cost_t = unsigned short;
 using total_cost_t = int;
+
 const cost_t INVALID_ROUTE = 65535;
+const total_cost_t MAX_TOTAL_COST = INT32_MAX;
 
 class task {
 

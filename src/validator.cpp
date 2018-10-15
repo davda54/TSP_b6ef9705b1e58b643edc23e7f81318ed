@@ -46,7 +46,7 @@ vector<city_id_t> validator::find_route(city_id_t start, const std::vector<clust
 	if (day >= clusters.size()) return output;
 
 	vector<city_id_t> cities = _data.get_cluster_cities(clusters[day]);
-	cost_t best_cost = INVALID_ROUTE;
+	total_cost_t best_cost = MAX_TOTAL_COST;
 	city_id_t best_city = cities[0];
 
 	for (size_t i = 0; i < cities.size(); i++)
@@ -54,8 +54,8 @@ vector<city_id_t> validator::find_route(city_id_t start, const std::vector<clust
 		cost_t start_to_city = _data.get_cost(start, cities[i], day);
 		if (start_to_city == INVALID_ROUTE) continue;
 
-		cost_t remaining_cost = route_cost(cities[i], clusters, day + 1);
-		cost_t total_cost = start_to_city + remaining_cost;
+		total_cost_t remaining_cost = route_cost(cities[i], clusters, day + 1);
+		total_cost_t total_cost = start_to_city + remaining_cost;
 
 		if (total_cost < best_cost) 
 		{
@@ -76,15 +76,15 @@ total_cost_t validator::route_cost(city_id_t start, const std::vector<cluster_id
 	if (day >= clusters.size()) return 0;
 
 	vector<city_id_t> cities = _data.get_cluster_cities(clusters[day]);
-	cost_t best_cost = INVALID_ROUTE;
+	total_cost_t best_cost = INVALID_ROUTE;
 
 	for (size_t i = 0; i < cities.size(); i++)
 	{
 		cost_t start_to_city = _data.get_cost(start, cities[i], day);
 		if (start_to_city == INVALID_ROUTE) continue;
 
-		cost_t remaining_cost = route_cost(cities[i], clusters, day + 1);
-		cost_t total_cost = start_to_city + remaining_cost;
+		total_cost_t remaining_cost = route_cost(cities[i], clusters, day + 1);
+		total_cost_t total_cost = start_to_city + remaining_cost;
 
 		if (total_cost < best_cost) best_cost = total_cost;
 	}

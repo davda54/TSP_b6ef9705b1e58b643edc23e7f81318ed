@@ -5,20 +5,19 @@
 #include "task.h"
 #include "generator.h"
 #include "validator.h"
+#include "test.h"
 
 using namespace std;
 
 
 int main(int argc, char *argv[]) 
 {
+	test::check_performance();
+	return 0;
+
 	auto start = chrono::steady_clock::now();
 
     std::ifstream f(argv[1]);
-
-#ifdef _DEBUG
-	cout << "file: " << argv[1] << endl << endl;
-	size_t solution_count = 0;
-#endif
 
     task t;
     t.load(f);
@@ -33,8 +32,6 @@ int main(int argc, char *argv[])
 	while(chrono::steady_clock::now() - start < max_duration)
 	{
 		auto solution = g.generate_solution();
-
-		solution_count++;
 		
 		if(!v.exist_route(solution)) continue;
 
@@ -48,8 +45,6 @@ int main(int argc, char *argv[])
 
 	auto route = v.find_route(best_solution);
 
-
-	cout << "solution count: " << solution_count << endl << endl;
 
     cout << best_price << endl;
 	t.print_path(route, cout);
