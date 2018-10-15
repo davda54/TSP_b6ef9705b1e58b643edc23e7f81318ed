@@ -17,6 +17,8 @@ class task {
 
 public:
 
+	void run(std::istream& input);
+
 	void load(std::istream& input);    
 
 	std::vector<std::tuple<city_id_t, cost_t>> get_edges(city_id_t city, int day) const;

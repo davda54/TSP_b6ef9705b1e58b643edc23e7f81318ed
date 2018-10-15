@@ -3,6 +3,8 @@
 #include <iostream>
 #include <unordered_map>
 #include <sstream>
+#include "validator.h"
+#include "generator.h"
 
 using namespace std;
 
@@ -76,6 +78,39 @@ void task::load(istream& input)
 
 	_start_city = city_identifiers_mapping.find(start_identifier)->second;
 	_start_cluster = _city_names[_start_city].second;
+}
+
+void task::run(std::istream& input)
+{
+	const auto start = chrono::steady_clock::now();
+	
+	load(input);
+
+	generator g(*this);
+	validator v(*this);
+
+	const auto max_duration = get_available_time();
+	auto best_price = INVALID_ROUTE;
+	vector<int> best_solution;
+
+	while (chrono::steady_clock::now() - start < max_duration)
+	{
+		auto solution = g.generate_solution();
+
+		if (!v.exist_route(solution)) continue;
+
+		auto price = v.route_cost(solution);
+		if (price < best_price)
+		{
+			best_solution = solution;
+			best_price = price;
+		}
+	}
+
+	auto route = v.find_route(best_solution);
+	
+	cout << best_price << endl;
+	print_path(route, cout);
 }
 
 vector<tuple<city_id_t, cost_t>> task::get_edges(city_id_t city, int day) const

@@ -17,7 +17,7 @@ void test::check_performance()
 	check_performance("resources\\TSALESMAN2-4.in"); // best: solutions:  988670, cost: 2147483647
 }
 
-void test::check_performance(std::string path)
+void test::check_performance(const std::string& path)
 {
 	auto start = chrono::steady_clock::now();
 

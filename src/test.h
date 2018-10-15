@@ -9,7 +9,7 @@ public:
 	static void check_performance();
 
 private:
-	static void check_performance(std::string path);
+	static void check_performance(const std::string& path);
 };
 
 #endif
