@@ -3,20 +3,21 @@
 
 using namespace std;
 
-vector<cluster_id_t> generator::generate_solution()
+generator::generator(const task& t): _data(t), _random_engine(42)
 {
-	int n = _data.cluster_count();
-	cluster_id_t start_cluster = _data.get_start_cluster();
-	vector<cluster_id_t> solution;
+	const cluster_id_t start_cluster = _data.get_start_cluster();
 
-	for (int i = 0; i < n; ++i) 
+	for (int i = 0; i < _data.cluster_count(); ++i)
 	{
 		if (i == start_cluster) continue;
-		solution.push_back(i);
+		_solution.push_back(i);
 	}
-	solution.push_back(start_cluster);
+	_solution.push_back(start_cluster);
+}
 
-	shuffle(solution.begin(), solution.end()-1, _random_engine);
+const vector<cluster_id_t>& generator::generate_solution()
+{
+	shuffle(_solution.begin(), _solution.end()-1, _random_engine);
 	
-	return solution;
+	return _solution;
 }

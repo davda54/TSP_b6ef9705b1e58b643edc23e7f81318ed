@@ -51,10 +51,20 @@ public:
 	{
         return _start_city;
     }
+
+	size_t get_number_of_cities(cluster_id_t cluster_id) const
+	{
+		return _clusters[cluster_id].size();
+	}
 	
 	size_t get_number_of_cities() const
 	{
 		return _city_names.size();
+	}
+
+	city_id_t get_nth_city_of_cluster(cluster_id_t cluster_id, size_t n) const
+	{
+		return _clusters[cluster_id][n];
 	}
 
 	std::string get_city_name(city_id_t city) const

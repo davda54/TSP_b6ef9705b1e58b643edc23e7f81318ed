@@ -6,13 +6,18 @@
 
 const int N = 300;
 
+struct city_available_struct
+{
+	city_available_struct(city_id_t city, bool available): city(city), available(available) {}
+
+	const city_id_t city;
+	bool available;
+};
+
 class validator {
 public:
 
-	explicit validator(const task& t) : _data(t)
-	{
-		_start_city = _data.get_start_city();
-	}
+	explicit validator(const task& t);
 
 	std::vector<city_id_t> find_route(const std::vector<cluster_id_t> &clusters);
 
@@ -23,12 +28,13 @@ public:
 private:
 	const task &_data;
 	city_id_t _start_city;
+	size_t _cluster_count;
+	std::vector<std::vector<city_available_struct>> _city_exist_cache;
 
-	std::vector<city_id_t> find_route(city_id_t start, const std::vector<cluster_id_t> &clusters, size_t day);
-
-	total_cost_t route_cost(city_id_t start, const std::vector<cluster_id_t> &clusters, size_t day);
-
-	bool exist_route(city_id_t start, const std::vector<cluster_id_t> &clusters, size_t day);
+	std::vector<city_id_t> find_route_recursive(city_id_t start, const std::vector<cluster_id_t> &clusters, size_t day);
+	total_cost_t route_cost_recursive(city_id_t start, const std::vector<cluster_id_t> &clusters, size_t day);
+	bool exist_route_recursive(city_id_t start, const std::vector<cluster_id_t> &clusters, size_t day);
+	bool exist_route_iterative(const std::vector<cluster_id_t> &clusters);
 };
 
 
