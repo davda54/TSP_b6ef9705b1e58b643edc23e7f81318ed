@@ -116,7 +116,7 @@ void task::run(std::istream& input)
 vector<tuple<city_id_t, cost_t>> task::get_edges(city_id_t city, int day) const
 {
 	vector<tuple<city_id_t, cost_t>> edges;
-	auto& city_paths = _graph[day - 1][city];
+	auto& city_paths = _graph[day][city];
 	for (int i = 0; i < _cluster_count; ++i)
 	{
 		if (city_paths[i] != INVALID_ROUTE) edges.push_back(make_tuple(i, city_paths[i]));
@@ -141,6 +141,6 @@ chrono::duration<int> task::get_available_time() const
 	int airports = get_number_of_cities();
 
 	if (clusters <= 20 && airports < 50) return chrono::duration<int>(3);
-	if (clusters <= 100 && airports < 200) return chrono::duration<int>(5);
+	if (clusters <= 100 && airports < 200) return chrono::duration<int>(500);
 	return chrono::duration<int>(15);;
 }

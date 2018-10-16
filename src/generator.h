@@ -18,7 +18,7 @@ public:
 private:
 
     const task& _data;
-	std::minstd_rand0 _random_engine;
+	std::mt19937 _random_engine;
 };
 
 #endif

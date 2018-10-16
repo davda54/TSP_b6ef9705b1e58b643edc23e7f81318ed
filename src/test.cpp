@@ -11,10 +11,10 @@ using namespace std;
 
 void test::check_performance()
 {
-	check_performance("resources\\TSALESMAN2-1.in"); // best: solutions:  591537, cost:       1396
+	//check_performance("resources\\TSALESMAN2-1.in"); // best: solutions:  591537, cost:       1396
 	check_performance("resources\\TSALESMAN2-2.in"); // best: solutions:  851513, cost: 2147483647
-	check_performance("resources\\TSALESMAN2-3.in"); // best: solutions: 1918034, cost: 2147483647
-	check_performance("resources\\TSALESMAN2-4.in"); // best: solutions:  988670, cost: 2147483647
+	//check_performance("resources\\TSALESMAN2-3.in"); // best: solutions: 1918034, cost: 2147483647
+	//check_performance("resources\\TSALESMAN2-4.in"); // best: solutions:  988670, cost: 2147483647
 }
 
 void test::check_performance(const std::string& path)
@@ -41,12 +41,12 @@ void test::check_performance(const std::string& path)
 		solution_count++;
 
 		if (!v.exist_route(solution)) continue;
-
-		auto price = v.route_cost(solution);
+		else cout << "ha";
+		/*auto price = v.route_cost(solution);
 		if (price < best_price)
 		{
 			best_price = price;
-		}
+		}*/
 	}
 
 	cout << path << ": clusters: " << t.cluster_count() << ",\tsolutions: " << solution_count << ",\tcost: " << best_price << endl;
