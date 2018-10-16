@@ -40,15 +40,14 @@ private:
 	city_id_t _start_city;
 	size_t _cluster_count;
 
-	std::vector<std::vector<city_available_struct>> _city_exist_cache;
-
-
-	size_t _longest_route = 0;
-
+	std::vector<std::vector<city_available_struct>> _city_available_cache;
+	std::vector<std::vector<city_cost_struct>> _city_cost_cache;
+	
 	std::vector<city_id_t> find_route_recursive(city_id_t start, const solution_t &clusters, size_t day);
 	total_cost_t route_cost_recursive(city_id_t start, const solution_t &clusters, size_t day);
 	bool exist_route_recursive(city_id_t start, const solution_t &clusters, size_t day);
 	bool exist_route_iterative(const solution_t &clusters);
+	total_cost_t route_cost_iterative(const solution_t &clusters);
 };
 
 
