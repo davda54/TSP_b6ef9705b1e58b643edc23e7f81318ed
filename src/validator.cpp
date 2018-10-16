@@ -174,7 +174,7 @@ vector<city_id_t> validator::find_route_recursive(city_id_t start, const solutio
 
 	if (day >= clusters.size()) return output;
 
-	vector<city_id_t> cities = _data.get_cluster_cities(clusters[day]);
+	const vector<city_id_t>& cities = _data.get_cluster_cities(clusters[day]);
 	total_cost_t best_cost = MAX_TOTAL_COST;
 	city_id_t best_city = cities[0];
 
@@ -184,6 +184,8 @@ vector<city_id_t> validator::find_route_recursive(city_id_t start, const solutio
 		if (start_to_city == INVALID_ROUTE) continue;
 
 		total_cost_t remaining_cost = route_cost_recursive(cities[i], clusters, day + 1);
+		if (remaining_cost == MAX_TOTAL_COST) continue;
+
 		total_cost_t total_cost = start_to_city + remaining_cost;
 
 		if (total_cost < best_cost) 
