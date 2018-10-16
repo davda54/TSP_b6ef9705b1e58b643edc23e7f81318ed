@@ -144,6 +144,6 @@ chrono::duration<int> task::get_available_time() const
 	int airports = get_number_of_cities();
 
 	if (clusters <= 20 && airports < 50) return chrono::duration<int>(3);
-	if (clusters <= 100 && airports < 200) return chrono::duration<int>(1000);
-	return chrono::duration<int>(15);;
+	if (clusters <= 100 && airports < 200) return chrono::duration<int>(5);
+	return chrono::duration<int>(1);
 }

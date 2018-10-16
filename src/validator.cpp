@@ -1,4 +1,5 @@
 #include "validator.h"
+#include <iostream>
 
 using namespace std;
 
@@ -19,25 +20,85 @@ validator::validator(const task& t): _data(t)
 	}
 }
 
-std::vector<city_id_t> validator::find_route(const std::vector<cluster_id_t>& clusters)
+std::vector<city_id_t> validator::find_route(const solution_t& clusters)
 {
 	return find_route_recursive(_start_city, clusters, 0);
 }
 
-total_cost_t validator::route_cost(const std::vector<cluster_id_t> &clusters)
+total_cost_t validator::route_cost(const solution_t& clusters)
 {
 	return route_cost_recursive(_start_city, clusters, 0);
 }
 
-bool validator::exist_route(const std::vector<cluster_id_t> &clusters)
+bool validator::exist_route(const solution_t& clusters)
 {
 	//return exist_route(_start_city, clusters, 0);
 	return exist_route_iterative(clusters);
 }
 
+size_t validator::longest_partial_route(const solution_t& clusters)
+{
+	size_t length;
+
+	bool any_available = false;
+	for (auto&& next_city : _city_exist_cache[clusters[0]])
+	{
+		next_city.available = _data.get_cost(_start_city, next_city.city, 0) != INVALID_ROUTE;
+		any_available = any_available || next_city.available;
+	}
+
+	if (!any_available) return false;
+
+	++length;
+
+	for (size_t i = 1; i < _cluster_count - 1; ++i)
+	{
+		any_available = false;
+		for (auto&& next_city : _city_exist_cache[clusters[i]])
+		{
+			next_city.available = false;
+		}
+
+		for (auto&& prev_city : _city_exist_cache[clusters[i - 1]])
+		{
+			if (!prev_city.available) continue;
+
+			for (auto&& next_city : _city_exist_cache[clusters[i]])
+			{
+				next_city.available = next_city.available || _data.get_cost(prev_city.city, next_city.city, i) != INVALID_ROUTE;
+				any_available = any_available || next_city.available;
+			}
+		}
+
+		if (!any_available)
+		{
+			for (auto&& next_city : _city_exist_cache[clusters[i]])
+			{
+				next_city.available = true;
+			}
+		}
+		else
+		{
+			length++;
+		}		
+	}
+
+	for (auto&& prev_city : _city_exist_cache[clusters[_cluster_count - 2]])
+	{
+		if (!prev_city.available) continue;
+
+		for (auto&& next_city : _city_exist_cache[clusters[_cluster_count - 1]])
+		{
+			if (_data.get_cost(prev_city.city, next_city.city, _cluster_count - 1) != INVALID_ROUTE) return length + 1;
+		}
+	}
+
+	return length;
+}
+
 // todo: rewrite to a dynamic programming solution
 
-bool validator::exist_route_recursive(city_id_t start, const std::vector<cluster_id_t> &clusters, size_t day) 
+bool validator::exist_route_recursive(city_id_t start, const solution_t& clusters, size_t day)
 {
 	if (day >= clusters.size()) return true;
 
@@ -53,7 +114,7 @@ bool validator::exist_route_recursive(city_id_t start, const std::vector<cluster
 	return false;
 }
 
-bool validator::exist_route_iterative(const std::vector<cluster_id_t>& clusters)
+bool validator::exist_route_iterative(const solution_t& clusters)
 {
 	bool any_available = false;
 	for (auto&& next_city : _city_exist_cache[clusters[0]])
@@ -84,6 +145,12 @@ bool validator::exist_route_iterative(const std::vector<cluster_id_t>& clusters)
 		}
 
 		if (!any_available) return false;
+
+		if(_longest_route < i)
+		{
+			_longest_route = i;
+			cout << i << endl;
+		}
 	}
 
 	for (auto&& prev_city : _city_exist_cache[clusters[_cluster_count - 2]])
@@ -102,7 +169,7 @@ bool validator::exist_route_iterative(const std::vector<cluster_id_t>& clusters)
 
 // todo: rewrite to a dynamic programming solution
 
-vector<city_id_t> validator::find_route_recursive(city_id_t start, const std::vector<cluster_id_t>& clusters, size_t day)
+vector<city_id_t> validator::find_route_recursive(city_id_t start, const solution_t& clusters, size_t day)
 {
 	vector<city_id_t> output;
 	output.push_back(start);
@@ -135,7 +202,7 @@ vector<city_id_t> validator::find_route_recursive(city_id_t start, const std::ve
 	return output;
 }
 
-total_cost_t validator::route_cost_recursive(city_id_t start, const std::vector<cluster_id_t> &clusters, size_t day) 
+total_cost_t validator::route_cost_recursive(city_id_t start, const solution_t& clusters, size_t day)
 {
 	if (day >= clusters.size()) return 0;
 

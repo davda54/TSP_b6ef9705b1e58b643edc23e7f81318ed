@@ -8,15 +8,22 @@
 class generator 
 {
 public:
-
 	explicit generator(const task& t);
-	const std::vector<cluster_id_t>&  generate_solution();
+	const solution_t& generate_solution();
+	const solution_t& generate_neighbor();
+	const solution_t& revert_one_step();
+
+	solution_t copy_current_solution() const { return _solution; }
 
 private:
 
     const task& _data;
+	size_t _cluster_count;
 	std::mt19937 _random_engine;
-	std::vector<cluster_id_t> _solution;
+	solution_t _solution;
+
+	size_t swapped_a;
+	size_t swapped_b;
 };
 
 #endif
