@@ -32,9 +32,9 @@ public:
 		return _clusters[cluster];
 	}
 
-    cost_t get_cost(city_id_t city_a, city_id_t city_b, int day) const 
+    cost_t get_cost(city_id_t from, city_id_t to, int day) const 
 	{
-        return _graph[day][city_a][city_b];
+        return _graph[day][from][to];
     }
 
 	cluster_id_t get_start_cluster() const
@@ -59,7 +59,7 @@ public:
 	
 	size_t get_number_of_cities() const
 	{
-		return _city_names.size();
+		return _city_count;
 	}
 
 	city_id_t get_nth_city_of_cluster(cluster_id_t cluster_id, size_t n) const
@@ -74,7 +74,8 @@ public:
 
 private:
 
-    int _cluster_count;
+    size_t _cluster_count;
+	size_t _city_count;
     city_id_t _start_city;
 	cluster_id_t _start_cluster;
 

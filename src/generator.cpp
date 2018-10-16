@@ -7,7 +7,7 @@ generator::generator(const task& t): _data(t), _random_engine(42)
 {
 	const cluster_id_t start_cluster = _data.get_start_cluster();
 
-	for (int i = 0; i < _data.cluster_count(); ++i)
+	for (size_t i = 0; i < _data.cluster_count(); ++i)
 	{
 		if (i == start_cluster) continue;
 		_solution.push_back(i);

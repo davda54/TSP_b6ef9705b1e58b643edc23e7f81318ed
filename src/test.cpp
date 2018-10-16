@@ -11,10 +11,10 @@ using namespace std;
 
 void test::check_performance()
 {
-	check_performance("resources\\TSALESMAN2-1.in"); // best solutions: 2 114 526, cost: 1407
+	//check_performance("resources\\TSALESMAN2-1.in"); // best solutions: 2 114 526, cost: 1407
 	check_performance("resources\\TSALESMAN2-2.in"); // best solutions: 2 688 053, cost: 2147483647
-	check_performance("resources\\TSALESMAN2-3.in"); // best solutions: 4 409 707, cost: 2147483647
-	check_performance("resources\\TSALESMAN2-4.in"); // best solutions: 1 711 945, cost: 2147483647
+	//check_performance("resources\\TSALESMAN2-3.in"); // best solutions: 4 409 707, cost: 2147483647
+	//check_performance("resources\\TSALESMAN2-4.in"); // best solutions: 1 711 945, cost: 2147483647
 }
 
 void test::check_performance(const std::string& path)
