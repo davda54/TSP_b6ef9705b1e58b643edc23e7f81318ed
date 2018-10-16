@@ -14,6 +14,14 @@ struct city_available_struct
 	bool available;
 };
 
+struct city_cost_struct
+{
+	city_cost_struct(city_id_t city, total_cost_t total_cost) : city(city), total_cost(total_cost) {}
+
+	const city_id_t city;
+	total_cost_t total_cost;
+};
+
 class validator {
 public:
 
@@ -25,13 +33,15 @@ public:
 
 	bool exist_route(const solution_t& clusters);
 
-	size_t longest_partial_route(const solution_t& clusters);
+	size_t number_of_conflicts(const solution_t& clusters);
 	
 private:
 	const task &_data;
 	city_id_t _start_city;
 	size_t _cluster_count;
+
 	std::vector<std::vector<city_available_struct>> _city_exist_cache;
+
 
 	size_t _longest_route = 0;
 

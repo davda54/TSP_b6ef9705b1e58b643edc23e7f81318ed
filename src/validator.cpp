@@ -36,9 +36,9 @@ bool validator::exist_route(const solution_t& clusters)
 	return exist_route_iterative(clusters);
 }
 
-size_t validator::longest_partial_route(const solution_t& clusters)
+size_t validator::number_of_conflicts(const solution_t& clusters)
 {
-	size_t length = 0;
+	size_t conflicts = 0;
 
 	bool any_available = false;
 	for (auto&& next_city : _city_exist_cache[clusters[0]])
@@ -47,7 +47,7 @@ size_t validator::longest_partial_route(const solution_t& clusters)
 		any_available = any_available || next_city.available;
 	}
 
-	if (any_available) ++length;
+	if (!any_available) ++conflicts;
 
 	for (size_t i = 1; i < _cluster_count - 1; ++i)
 	{
@@ -70,15 +70,12 @@ size_t validator::longest_partial_route(const solution_t& clusters)
 
 		if (!any_available)
 		{
+			++conflicts;
 			for (auto&& next_city : _city_exist_cache[clusters[i]])
 			{
 				next_city.available = true;
 			}
-		}
-		else
-		{
-			length++;
-		}		
+		}	
 	}
 
 	for (auto&& prev_city : _city_exist_cache[clusters[_cluster_count - 2]])
@@ -87,11 +84,11 @@ size_t validator::longest_partial_route(const solution_t& clusters)
 
 		for (auto&& next_city : _city_exist_cache[clusters[_cluster_count - 1]])
 		{
-			if (_data.get_cost(prev_city.city, next_city.city, _cluster_count - 1) != INVALID_ROUTE) return length + 1;
+			if (_data.get_cost(prev_city.city, next_city.city, _cluster_count - 1) != INVALID_ROUTE) return conflicts;
 		}
 	}
 
-	return length;
+	return conflicts + 1;
 }
 
 // todo: rewrite to a dynamic programming solution
