@@ -8,16 +8,16 @@
 #include <chrono>
 
 
-class search
+class searcher
 {
 public:
-	search(const task& data, generator& g, const validator& v, std::chrono::duration<int> available_time): _data(data), _generator(g), _validator(v), _available_time(available_time) {}
+	searcher(const task& data, generator& g, validator& v, std::chrono::duration<int> available_time): _data(data), _generator(g), _validator(v), _available_time(available_time) {}
 	const solution_t& run();
 
 private:
 	const task& _data;
 	generator& _generator;
-	const validator& _validator;
+	validator& _validator;
 	const std::chrono::duration<int> _available_time;
 };
 

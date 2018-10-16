@@ -5,6 +5,7 @@
 #include <sstream>
 #include "validator.h"
 #include "generator.h"
+#include "searcher.h"
 
 using namespace std;
 
@@ -89,30 +90,17 @@ void task::run(std::istream& input)
 	
 	load(input);
 
+	const auto max_duration = get_available_time();
+
 	generator g(*this);
 	validator v(*this);
+	searcher s(*this, g, v, max_duration);
 
-	const auto max_duration = get_available_time();
-	auto best_price = INVALID_ROUTE;
-	vector<int> best_solution;
+	const solution_t& solution = s.run();
 
-	while (chrono::steady_clock::now() - start < max_duration)
-	{
-		auto solution = g.generate_solution();
-
-		if (!v.exist_route(solution)) continue;
-
-		auto price = v.route_cost(solution);
-		if (price < best_price)
-		{
-			best_solution = solution;
-			best_price = price;
-		}
-	}
-
-	auto route = v.find_route(best_solution);
+	auto route = v.find_route(solution);
 	
-	cout << best_price << endl;
+	cout << v.route_cost(solution) << endl;
 	print_path(route, cout);
 }
 

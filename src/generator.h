@@ -14,6 +14,7 @@ public:
 	const solution_t& revert_one_step();
 
 	solution_t copy_current_solution() const { return _solution; }
+	const solution_t& current_solution() const { return _solution; }
 
 private:
 
@@ -22,8 +23,8 @@ private:
 	std::mt19937 _random_engine;
 	solution_t _solution;
 
-	size_t swapped_a;
-	size_t swapped_b;
+	size_t _swapped_a;
+	size_t _swapped_b;
 };
 
 #endif

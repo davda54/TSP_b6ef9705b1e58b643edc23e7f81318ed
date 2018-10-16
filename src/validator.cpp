@@ -38,7 +38,7 @@ bool validator::exist_route(const solution_t& clusters)
 
 size_t validator::longest_partial_route(const solution_t& clusters)
 {
-	size_t length;
+	size_t length = 0;
 
 	bool any_available = false;
 	for (auto&& next_city : _city_exist_cache[clusters[0]])
@@ -47,9 +47,7 @@ size_t validator::longest_partial_route(const solution_t& clusters)
 		any_available = any_available || next_city.available;
 	}
 
-	if (!any_available) return false;
-
-	++length;
+	if (any_available) ++length;
 
 	for (size_t i = 1; i < _cluster_count - 1; ++i)
 	{

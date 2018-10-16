@@ -25,21 +25,21 @@ const solution_t& generator::generate_solution()
 
 const solution_t& generator::generate_neighbor()
 {
-	swapped_a = _random_engine() % (_cluster_count-1);
-	swapped_b = (swapped_a + 1) % (_cluster_count - 1);
+	_swapped_a = _random_engine() % (_cluster_count - 1);
+	_swapped_b = (_swapped_a + 1) % (_cluster_count - 1);
 
-	_solution[swapped_a] ^= _solution[swapped_b];
-	_solution[swapped_b] ^= _solution[swapped_a];
-	_solution[swapped_a] ^= _solution[swapped_b];
+	_solution[_swapped_a] ^= _solution[_swapped_b];
+	_solution[_swapped_b] ^= _solution[_swapped_a];
+	_solution[_swapped_a] ^= _solution[_swapped_b];
 
 	return _solution;
 }
 
 const solution_t& generator::revert_one_step()
 {
-	_solution[swapped_a] ^= _solution[swapped_b];
-	_solution[swapped_b] ^= _solution[swapped_a];
-	_solution[swapped_a] ^= _solution[swapped_b];
+	_solution[_swapped_a] ^= _solution[_swapped_b];
+	_solution[_swapped_b] ^= _solution[_swapped_a];
+	_solution[_swapped_a] ^= _solution[_swapped_b];
 
 	return _solution;
 }
