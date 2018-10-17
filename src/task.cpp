@@ -96,7 +96,7 @@ void task::run(std::istream& input)
 	validator v(*this);
 	searcher s(*this, g, v, max_duration);
 
-	const solution_t& solution = s.run();
+	const Solution& solution = s.run();
 
 	auto route = v.find_route(solution);
 	
@@ -131,7 +131,7 @@ chrono::duration<int> task::get_available_time() const
 	int clusters = cluster_count();
 	int airports = get_number_of_cities();
 
-	if (clusters <= 20 && airports < 50) return chrono::duration<int>(3);
-	if (clusters <= 100 && airports < 200) return chrono::duration<int>(5);
-	return chrono::duration<int>(1);
+	if (clusters <= 20 && airports < 50) return chrono::duration<int>(30);
+	if (clusters <= 100 && airports < 200) return chrono::duration<int>(50);
+	return chrono::duration<int>(300);
 }

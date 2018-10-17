@@ -19,13 +19,13 @@ public:
 
 	explicit validator(const task& t);
 
-	std::vector<city_id_t> find_route(const solution_t& clusters);
+	std::vector<city_id_t> find_route(const Solution& clusters);
 
-	total_cost_t route_cost(const solution_t& clusters);
+	total_cost_t route_cost(const Solution& clusters);
 
-	bool exist_route(const solution_t& clusters);
+	bool exist_route(const Solution& clusters);
 
-	size_t longest_partial_route(const solution_t& clusters);
+	size_t longest_partial_route(const Solution& clusters);
 	
 private:
 	const task &_data;
@@ -35,10 +35,10 @@ private:
 
 	size_t _longest_route = 0;
 
-	std::vector<city_id_t> find_route_recursive(city_id_t start, const solution_t &clusters, size_t day);
-	total_cost_t route_cost_recursive(city_id_t start, const solution_t &clusters, size_t day);
-	bool exist_route_recursive(city_id_t start, const solution_t &clusters, size_t day);
-	bool exist_route_iterative(const solution_t &clusters);
+	std::vector<city_id_t> find_route_recursive(city_id_t start, const Solution &clusters, size_t day);
+	total_cost_t route_cost_recursive(city_id_t start, const Solution &clusters, size_t day);
+	bool exist_route_recursive(city_id_t start, const Solution &clusters, size_t day);
+	bool exist_route_iterative(const Solution &clusters);
 };
 
 

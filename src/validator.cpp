@@ -20,23 +20,23 @@ validator::validator(const task& t): _data(t)
 	}
 }
 
-std::vector<city_id_t> validator::find_route(const solution_t& clusters)
+std::vector<city_id_t> validator::find_route(const Solution& clusters)
 {
 	return find_route_recursive(_start_city, clusters, 0);
 }
 
-total_cost_t validator::route_cost(const solution_t& clusters)
+total_cost_t validator::route_cost(const Solution& clusters)
 {
 	return route_cost_recursive(_start_city, clusters, 0);
 }
 
-bool validator::exist_route(const solution_t& clusters)
+bool validator::exist_route(const Solution& clusters)
 {
 	//return exist_route(_start_city, clusters, 0);
 	return exist_route_iterative(clusters);
 }
 
-size_t validator::longest_partial_route(const solution_t& clusters)
+size_t validator::longest_partial_route(const Solution& clusters)
 {
 	size_t length = 0;
 
@@ -96,7 +96,7 @@ size_t validator::longest_partial_route(const solution_t& clusters)
 
 // todo: rewrite to a dynamic programming solution
 
-bool validator::exist_route_recursive(city_id_t start, const solution_t& clusters, size_t day)
+bool validator::exist_route_recursive(city_id_t start, const Solution& clusters, size_t day)
 {
 	if (day >= clusters.size()) return true;
 
@@ -112,7 +112,7 @@ bool validator::exist_route_recursive(city_id_t start, const solution_t& cluster
 	return false;
 }
 
-bool validator::exist_route_iterative(const solution_t& clusters)
+bool validator::exist_route_iterative(const Solution& clusters)
 {
 	bool any_available = false;
 	for (auto&& next_city : _city_exist_cache[clusters[0]])
@@ -167,7 +167,7 @@ bool validator::exist_route_iterative(const solution_t& clusters)
 
 // todo: rewrite to a dynamic programming solution
 
-vector<city_id_t> validator::find_route_recursive(city_id_t start, const solution_t& clusters, size_t day)
+vector<city_id_t> validator::find_route_recursive(city_id_t start, const Solution& clusters, size_t day)
 {
 	vector<city_id_t> output;
 	output.push_back(start);
@@ -202,7 +202,7 @@ vector<city_id_t> validator::find_route_recursive(city_id_t start, const solutio
 	return output;
 }
 
-total_cost_t validator::route_cost_recursive(city_id_t start, const solution_t& clusters, size_t day)
+total_cost_t validator::route_cost_recursive(city_id_t start, const Solution& clusters, size_t day)
 {
 	if (day >= clusters.size()) return 0;
 
