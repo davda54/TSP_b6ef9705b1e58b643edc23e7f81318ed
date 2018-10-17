@@ -14,6 +14,14 @@ struct city_available_struct
 	bool available;
 };
 
+struct city_cost_struct
+{
+	city_cost_struct(city_id_t city, total_cost_t total_cost) : city(city), total_cost(total_cost) {}
+
+	const city_id_t city;
+	total_cost_t total_cost;
+};
+
 class validator {
 public:
 
@@ -25,7 +33,7 @@ public:
 
 	bool exist_route(const Solution& clusters);
 
-	size_t longest_partial_route(const Solution& clusters);
+	size_t number_of_conflicts(const Solution& clusters);
 	
 private:
 	const task &_data;
@@ -33,12 +41,14 @@ private:
 	size_t _cluster_count;
 	std::vector<std::vector<city_available_struct>> _city_exist_cache;
 
-	size_t _longest_route = 0;
+	std::vector<std::vector<city_available_struct>> _city_available_cache;
+	std::vector<std::vector<city_cost_struct>> _city_cost_cache;
 
 	std::vector<city_id_t> find_route_recursive(city_id_t start, const Solution &clusters, size_t day);
 	total_cost_t route_cost_recursive(city_id_t start, const Solution &clusters, size_t day);
 	bool exist_route_recursive(city_id_t start, const Solution &clusters, size_t day);
 	bool exist_route_iterative(const Solution &clusters);
+	total_cost_t route_cost_iterative(const Solution&clusters);
 };
 
 

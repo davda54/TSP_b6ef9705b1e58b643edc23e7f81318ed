@@ -54,15 +54,15 @@ const Solution& searcher::run()
 
 float searcher::acceptance_probability(energy_t current, energy_t next) const {
 
-	if (next >= current) return 1.0;
-	return (float) exp((float)(next - current) / _t);
+	if (next < current) return 1.0;
+	return (float) exp(-(float)(next - current) / _t);
 
 }
 
 energy_t searcher::get_energy(const Solution& s) const {
 
 	// TODO: better cost function
-	return _validator.longest_partial_route(s);
+	return _validator.number_of_conflicts(s);
 }
 
 void searcher::update_temperature() {

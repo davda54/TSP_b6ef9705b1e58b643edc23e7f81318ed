@@ -1,5 +1,5 @@
 #include "validator.h"
-#include <iostream>
+#include <algorithm>
 
 using namespace std;
 
@@ -11,12 +11,16 @@ validator::validator(const task& t): _data(t)
 
 	for (cluster_id_t cluster_id = 0; cluster_id < _data.cluster_count(); ++cluster_id)
 	{
-		std::vector<city_available_struct> cities;
+		std::vector<city_available_struct> cities_available;
+		std::vector<city_cost_struct> cities_cost;
+
 		for (size_t n = 0; n < _data.get_number_of_cities(cluster_id); ++n)
 		{
-			cities.emplace_back(_data.get_nth_city_of_cluster(cluster_id, n), false);
+			cities_available.emplace_back(_data.get_nth_city_of_cluster(cluster_id, n), false);
+			cities_cost.emplace_back(_data.get_nth_city_of_cluster(cluster_id, n), MAX_TOTAL_COST);
 		}
-		_city_exist_cache.push_back(move(cities));
+		_city_available_cache.push_back(move(cities_available));
+		_city_cost_cache.push_back(move(cities_cost));
 	}
 }
 
@@ -27,7 +31,8 @@ std::vector<city_id_t> validator::find_route(const Solution& clusters)
 
 total_cost_t validator::route_cost(const Solution& clusters)
 {
-	return route_cost_recursive(_start_city, clusters, 0);
+	//return route_cost_recursive(_start_city, clusters, 0);
+	return route_cost_iterative(clusters);
 }
 
 bool validator::exist_route(const Solution& clusters)
@@ -36,32 +41,32 @@ bool validator::exist_route(const Solution& clusters)
 	return exist_route_iterative(clusters);
 }
 
-size_t validator::longest_partial_route(const Solution& clusters)
+size_t validator::number_of_conflicts(const Solution& clusters)
 {
-	size_t length = 0;
+	size_t conflicts = 0;
 
 	bool any_available = false;
-	for (auto&& next_city : _city_exist_cache[clusters[0]])
+	for (auto&& next_city : _city_available_cache[clusters[0]])
 	{
 		next_city.available = _data.get_cost(_start_city, next_city.city, 0) != INVALID_ROUTE;
 		any_available = any_available || next_city.available;
 	}
 
-	if (any_available) ++length;
+	if (!any_available) ++conflicts;
 
 	for (size_t i = 1; i < _cluster_count - 1; ++i)
 	{
 		any_available = false;
-		for (auto&& next_city : _city_exist_cache[clusters[i]])
+		for (auto&& next_city : _city_available_cache[clusters[i]])
 		{
 			next_city.available = false;
 		}
 
-		for (auto&& prev_city : _city_exist_cache[clusters[i - 1]])
+		for (auto&& prev_city : _city_available_cache[clusters[i - 1]])
 		{
 			if (!prev_city.available) continue;
 
-			for (auto&& next_city : _city_exist_cache[clusters[i]])
+			for (auto&& next_city : _city_available_cache[clusters[i]])
 			{
 				next_city.available = next_city.available || _data.get_cost(prev_city.city, next_city.city, i) != INVALID_ROUTE;
 				any_available = any_available || next_city.available;
@@ -70,28 +75,25 @@ size_t validator::longest_partial_route(const Solution& clusters)
 
 		if (!any_available)
 		{
-			for (auto&& next_city : _city_exist_cache[clusters[i]])
+			++conflicts;
+			for (auto&& next_city : _city_available_cache[clusters[i]])
 			{
 				next_city.available = true;
 			}
 		}
-		else
-		{
-			length++;
-		}		
 	}
 
-	for (auto&& prev_city : _city_exist_cache[clusters[_cluster_count - 2]])
+	for (auto&& prev_city : _city_available_cache[clusters[_cluster_count - 2]])
 	{
 		if (!prev_city.available) continue;
 
-		for (auto&& next_city : _city_exist_cache[clusters[_cluster_count - 1]])
+		for (auto&& next_city : _city_available_cache[clusters[_cluster_count - 1]])
 		{
-			if (_data.get_cost(prev_city.city, next_city.city, _cluster_count - 1) != INVALID_ROUTE) return length + 1;
+			if (_data.get_cost(prev_city.city, next_city.city, _cluster_count - 1) != INVALID_ROUTE) return conflicts;
 		}
 	}
 
-	return length;
+	return conflicts + 1;
 }
 
 // todo: rewrite to a dynamic programming solution
@@ -115,7 +117,7 @@ bool validator::exist_route_recursive(city_id_t start, const Solution& clusters,
 bool validator::exist_route_iterative(const Solution& clusters)
 {
 	bool any_available = false;
-	for (auto&& next_city : _city_exist_cache[clusters[0]])
+	for (auto&& next_city : _city_available_cache[clusters[0]])
 	{
 		next_city.available = _data.get_cost(_start_city, next_city.city, 0) != INVALID_ROUTE;
 		any_available = any_available || next_city.available;
@@ -126,16 +128,16 @@ bool validator::exist_route_iterative(const Solution& clusters)
 	for (size_t i = 1; i < _cluster_count - 1; ++i)
 	{
 		any_available = false;
-		for (auto&& next_city : _city_exist_cache[clusters[i]])
+		for (auto&& next_city : _city_available_cache[clusters[i]])
 		{
 			next_city.available = false;
 		}
 
-		for (auto&& prev_city : _city_exist_cache[clusters[i - 1]])
+		for (auto&& prev_city : _city_available_cache[clusters[i - 1]])
 		{
 			if (!prev_city.available) continue;
 
-			for (auto&& next_city : _city_exist_cache[clusters[i]])
+			for (auto&& next_city : _city_available_cache[clusters[i]])
 			{
 				next_city.available = next_city.available || _data.get_cost(prev_city.city, next_city.city, i) != INVALID_ROUTE;
 				any_available = any_available || next_city.available;
@@ -143,19 +145,13 @@ bool validator::exist_route_iterative(const Solution& clusters)
 		}
 
 		if (!any_available) return false;
-
-		if(_longest_route < i)
-		{
-			_longest_route = i;
-			cout << i << endl;
-		}
 	}
 
-	for (auto&& prev_city : _city_exist_cache[clusters[_cluster_count - 2]])
+	for (auto&& prev_city : _city_available_cache[clusters[_cluster_count - 2]])
 	{
 		if (!prev_city.available) continue;
 
-		for (auto&& next_city : _city_exist_cache[clusters[_cluster_count - 1]])
+		for (auto&& next_city : _city_available_cache[clusters[_cluster_count - 1]])
 		{
 			if (_data.get_cost(prev_city.city, next_city.city, _cluster_count - 1) != INVALID_ROUTE) return true;
 		}
@@ -164,6 +160,61 @@ bool validator::exist_route_iterative(const Solution& clusters)
 	return false;
 }
 
+total_cost_t validator::route_cost_iterative(const Solution& clusters)
+{
+	bool any_available = false;
+	for (auto&& next_city : _city_cost_cache[clusters[0]])
+	{
+		next_city.total_cost = _data.get_cost(_start_city, next_city.city, 0);
+
+		if (next_city.total_cost == INVALID_ROUTE) next_city.total_cost = MAX_TOTAL_COST;
+		else any_available = true;
+	}
+
+	if (!any_available) return MAX_TOTAL_COST;
+
+	for (size_t i = 1; i < _cluster_count - 1; ++i)
+	{
+		any_available = false;
+		for (auto&& next_city : _city_cost_cache[clusters[i]])
+		{
+			next_city.total_cost = MAX_TOTAL_COST;
+		}
+
+		for (auto&& prev_city : _city_cost_cache[clusters[i - 1]])
+		{
+			if (prev_city.total_cost == MAX_TOTAL_COST) continue;
+
+			for (auto&& next_city : _city_cost_cache[clusters[i]])
+			{
+				auto prev_to_next_cost = _data.get_cost(prev_city.city, next_city.city, i);
+				if(prev_to_next_cost == INVALID_ROUTE) continue;
+
+				next_city.total_cost = min(next_city.total_cost, prev_city.total_cost + prev_to_next_cost);
+				any_available = true;
+			}
+		}
+
+		if (!any_available) return MAX_TOTAL_COST;
+	}
+
+	total_cost_t best_cost = MAX_TOTAL_COST;
+
+	for (auto&& prev_city : _city_cost_cache[clusters[_cluster_count - 2]])
+	{
+		if (prev_city.total_cost == MAX_TOTAL_COST) continue;
+
+		for (auto&& next_city : _city_cost_cache[clusters[_cluster_count - 1]])
+		{
+			auto prev_to_next_cost = _data.get_cost(prev_city.city, next_city.city, _cluster_count - 1);
+			if (prev_to_next_cost == INVALID_ROUTE) continue;
+
+			best_cost = min(best_cost, prev_city.total_cost + prev_to_next_cost);
+		}
+	}
+
+	best_cost;
+}
 
 // todo: rewrite to a dynamic programming solution
 
