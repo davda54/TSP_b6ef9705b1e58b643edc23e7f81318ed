@@ -14,12 +14,13 @@ using namespace std;
 
 
 void task::load(FILE *input) {
+
 	char start_identifier[4];
 	unsigned int cluster_count;
 	fscanf(input, "%u %s\n", &cluster_count, start_identifier);
 	_cluster_count = cluster_count;
 
-	unordered_map<string, city_id_t> city_identifiers_mapping;
+	city_id_t city_identifiers_mapping[62][62][62];
 
 	char cluster_name[256];
     char city_name[4];
@@ -31,7 +32,6 @@ void task::load(FILE *input) {
 		_cluster_names.emplace_back(cluster_name);
 		vector<city_id_t> cluster_cities;
 
-
 		int c = 0;
 
 		short in_city = 0;
@@ -41,7 +41,7 @@ void task::load(FILE *input) {
 				auto new_city_index = (city_id_t)_city_names.size();
 				cluster_cities.push_back(new_city_index);
 				_city_names.emplace_back(string(city_name), cluster_id);
-				city_identifiers_mapping[string(city_name)] = new_city_index;
+				city_identifiers_mapping[city_name[0] - 'A'][city_name[1] - 'A'][city_name[2] - 'A'] = new_city_index;
 				in_city = -1;
 			}
 
@@ -70,14 +70,14 @@ void task::load(FILE *input) {
 		_graph.push_back(b);
 	}
 
-	char to_identifier[4];
-	char from_identifier[4];
+	char to_city[4];
+	char from_city[4];
 	int day;
 	int cost;
 
-	while (fscanf(input, "%s %s %i %u\n", from_identifier, to_identifier, &day, &cost) == 4) {
-		city_id_t from = city_identifiers_mapping.find(std::string(from_identifier))->second;
-		city_id_t to = city_identifiers_mapping.find(std::string(to_identifier))->second;
+	while (fscanf(input, "%s %s %i %u\n", from_city, to_city, &day, &cost) == 4) {
+		city_id_t from = city_identifiers_mapping[from_city[0] - 'A'][from_city[1] - 'A'][from_city[2] - 'A'];
+		city_id_t to = city_identifiers_mapping[to_city[0] - 'A'][to_city[1] - 'A'][to_city[2] - 'A'];
 
 		// TODO: udelej poradne -- graph je mozna moc velky?
 		if (day == 0)
@@ -89,7 +89,7 @@ void task::load(FILE *input) {
 			_graph[day - 1][from][to] = min((cost_t) cost, _graph[day - 1][from][to]);
 	}
 
-	_start_city = city_identifiers_mapping.find(std::string(start_identifier))->second;
+	_start_city = city_identifiers_mapping[start_identifier[0] - 'A'][start_identifier[1] - 'A'][start_identifier[2] - 'A'];
 	_start_cluster = _city_names[_start_city].second;
 
 	cout << "Input reading done!" << '\n';
