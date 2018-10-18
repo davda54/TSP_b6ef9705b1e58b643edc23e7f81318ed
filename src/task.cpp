@@ -99,7 +99,7 @@ void task::run(FILE *input)
 
 	generator g(*this);
 	validator v(*this);
-	searcher s(*this, g, v, max_duration, "stats.out");
+	searcher s(*this, g, v, max_duration, "stats.out", start);
 
 	const Solution& solution = s.run();
 
@@ -138,5 +138,5 @@ chrono::duration<int> task::get_available_time() const
 
 	if (clusters <= 20 && airports < 50) return chrono::duration<int>(60);
 	if (clusters <= 100 && airports < 200) return chrono::duration<int>(60);
-	return chrono::duration<int>(60);
+	return chrono::duration<int>(720);
 }

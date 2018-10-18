@@ -8,57 +8,68 @@ using namespace std;
 
 const Solution& searcher::run()
 {
-	const auto start = chrono::steady_clock::now();
-
-    size_t i = 0;
 	_t = INITIAL_TEMP;
-    energy_t best = _data.cluster_count();
-	energy_t current = get_energy(_generator.generate_solution());
-	//const Solution* solution = &_generator.generate_solution();
 
 	_generator.generate_solution();
+	energy_t current = get_energy(_generator.current_solution());
+	energy_t best = current;
+	size_t count = 0;
 
-	while (chrono::steady_clock::now() - start < _available_time)
+	while (chrono::steady_clock::now() - _start < _available_time)
 	{
-		//auto rnd = _generator.rnd_number();
 		const Solution& solution = _generator.generate_neighbor();
-		auto new_energy = get_energy(solution);
+		auto new_energy = get_energy(solution, _generator.swapped_index());
 
-//		auto current = get_order_energy(solution, rnd - 1, rnd, rnd + 1, rnd + 2);
-//		auto new_energy = get_order_energy(solution, rnd - 1, rnd + 1, rnd, rnd + 2);
+		if (new_energy < best)
+		{
+			best = new_energy;
+			cout << endl << best << endl << "\t" << _t;
+		}
 
-		float p = acceptance_probability(current, new_energy);
-
-		if (p > _generator.rnd_float()) {
-			//solution = _generator.swap(rnd);
+		if(new_energy < current)
+		{
 			current = new_energy;
 		}
-		else _generator.revert_one_step();
-
-        // PRINT DEBUG
-        if (best > current) best = current;
-        if (i % 1 == 0)_stats << i << ' ' << current << ' ' << best << ' ' << _t << '\n';
-        // PRINT DEBUG
-
-        if (current == _data.cluster_count())
+		else
 		{
-			return _generator.current_solution();
+			float p = acceptance_probability(current, new_energy);
+
+			if (p > _generator.rnd_float()) current = new_energy;
+			else
+			{
+				_generator.revert_one_step();
+				_validator.number_of_conflicts(solution, _generator.swapped_index());
+			}
 		}
 
+        // PRINT DEBUG
+        if (count % 1000 == 0)_stats << count << ' ' << current << ' ' << best << ' ' << _t << '\n';
+        // PRINT DEBUG
+
+		if(new_energy == 0)
+		{
+			break;
+		}
+
+		count++;
 		update_temperature();
-        ++i;
 	}
 
-
-
+	cout << endl << endl << "time: " << (chrono::steady_clock::now() - _start).count() / 1000000.0 << " ms" << endl;
+	cout << "permutations: " << count << endl << endl;
 	return _generator.current_solution();
 }
 
 float searcher::acceptance_probability(energy_t current, energy_t next) const {
 
-	if (next < current) return 1.0;
 	return (float) exp(-(float)(next - current) / _t);
 
+}
+
+energy_t searcher::get_energy(const Solution& s, size_t swapped_index) const {
+
+	// TODO: better cost function
+	return _validator.number_of_conflicts(s, swapped_index);
 }
 
 energy_t searcher::get_energy(const Solution& s) const {
@@ -70,6 +81,11 @@ energy_t searcher::get_energy(const Solution& s) const {
 void searcher::update_temperature() {
 
 	_t *= COOLING_TEMP;
+
+	if((chrono::steady_clock::now() - _start).count() % 100000 == 0)
+	{
+		cout << "\r\t" << _t;
+	}
 }
 
 energy_t searcher::get_order_energy(const Solution *s, size_t start, size_t first, size_t second, size_t end) const {
