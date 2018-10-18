@@ -17,8 +17,8 @@ class searcher
 public:
     searcher(const task &data, generator &g, validator &v, std::chrono::duration<int> available_time,
              const std::string &stats_path, std::chrono::steady_clock::time_point start) :
-            _data(data), _generator(g), _validator(v), _available_time(available_time) {
-        _stats = std::ofstream(stats_path), _start(start);
+            _data(data), _generator(g), _validator(v), _available_time(available_time), _start(start) {
+        _stats = std::ofstream(stats_path);
     }
 
 	const Solution& run();
@@ -26,7 +26,7 @@ public:
 
 private:
 
-	float acceptance_probability(energy_t current, energy_t next, energy_t best) const;
+	float acceptance_probability(energy_t current, energy_t next) const;
 	void update_temperature();
 	energy_t get_energy(const Solution& s) const;
 	energy_t get_energy(const Solution& s, size_t swapped_index) const;

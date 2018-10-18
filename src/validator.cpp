@@ -139,7 +139,7 @@ size_t validator::number_of_conflicts(const Solution& clusters, size_t swapped_i
 		}
 	}
 
-	for (size_t i = max(swapped_index, 1u); i < _cluster_count - 1; ++i)
+	for (size_t i = max(size_t(swapped_index), size_t(1)); i < _cluster_count - 1; ++i)
 	{
 		bool any_change = false;
 		any_available = was_any_available = false;
