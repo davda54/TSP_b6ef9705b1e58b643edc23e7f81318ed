@@ -11,13 +11,17 @@ const Solution& searcher::run()
 	_t = INITIAL_TEMP;
 
 	_generator.generate_solution();
+
 	energy_t current = get_energy(_generator.current_solution());
 	energy_t best = current;
 	size_t count = 0;
 
 	while (chrono::steady_clock::now() - _start < _available_time)
 	{
-		const Solution& solution = _generator.generate_neighbor();
+		if (_generator.rnd_float() < 0.1f) _generator.generate_clever_neighbor();
+		else _generator.generate_neighbor();
+
+		const Solution& solution = _generator.current_solution();
 		auto new_energy = get_energy(solution, _generator.swapped_index());
 
 		if (new_energy < best)
@@ -43,7 +47,7 @@ const Solution& searcher::run()
 		}
 
         // PRINT DEBUG
-        if (count % 1000 == 0)_stats << count << ' ' << current << ' ' << best << ' ' << _t << '\n';
+        //if (count % 1000 == 0)_stats << count << ' ' << current << ' ' << best << ' ' << _t << '\n';
         // PRINT DEBUG
 
 		if(new_energy == 0)
@@ -98,6 +102,7 @@ energy_t searcher::get_order_energy(const Solution *s, size_t start, size_t firs
 	size_t d = end % clusters;
 
 	return _data.get_cost()*/
+	return 0;
 }
 
 
