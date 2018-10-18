@@ -18,6 +18,7 @@ public:
 
     Solution copy_current_solution() const { return _solution; }
 	const Solution& current_solution() const { return _solution; }
+	size_t swapped_index() const { return _swapped_a; }
 
 private:
 

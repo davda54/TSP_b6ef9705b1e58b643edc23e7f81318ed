@@ -8,10 +8,11 @@ const int N = 300;
 
 struct city_available_struct
 {
-	city_available_struct(city_id_t city, bool available): city(city), available(available) {}
+	city_available_struct(city_id_t city, bool available, bool last_available): city(city), available(available), last_available(last_available) {}
 
 	const city_id_t city;
 	bool available;
+	bool last_available;
 };
 
 struct city_cost_struct
@@ -34,6 +35,9 @@ public:
 	bool exist_route(const Solution& clusters);
 
 	size_t number_of_conflicts(const Solution& clusters);
+
+	size_t number_of_conflicts(const Solution& clusters, size_t swapped_index);
+
 	
 private:
 	const task &_data;
@@ -43,6 +47,7 @@ private:
 
 	std::vector<std::vector<city_available_struct>> _city_available_cache;
 	std::vector<std::vector<city_cost_struct>> _city_cost_cache;
+	size_t _last_conflict_count;
 
 	std::vector<city_id_t> find_route_recursive(city_id_t start, const Solution &clusters, size_t day);
 	total_cost_t route_cost_recursive(city_id_t start, const Solution &clusters, size_t day);

@@ -26,7 +26,14 @@ const Solution& generator::generate_solution()
 
 const Solution& generator::generate_neighbor()
 {
-	return *swap(_random_engine());
+	_swapped_a = _random_engine() % (_cluster_count - 1);
+	_swapped_b = (_swapped_a + 1) % (_cluster_count - 1);
+
+	_solution[_swapped_a] ^= _solution[_swapped_b];
+	_solution[_swapped_b] ^= _solution[_swapped_a];
+	_solution[_swapped_a] ^= _solution[_swapped_b];
+
+	return _solution;
 }
 
 const Solution* generator::swap(size_t index){
