@@ -22,7 +22,7 @@ void task::load(FILE *input) {
 	unordered_map<string, city_id_t> city_identifiers_mapping;
 
 	char cluster_name[256];
-	char *city_name = nullptr;
+    char city_name[4];
 
 	for (size_t i = 0; i < _cluster_count; ++i)
 	{
@@ -31,18 +31,24 @@ void task::load(FILE *input) {
 		_cluster_names.emplace_back(cluster_name);
 		vector<city_id_t> cluster_cities;
 
-		size_t len;
-		char *line = nullptr;
 
-		ssize_t read = getline(&line, &len, input);
-		line[read - 1] = '\0';
-		city_name = strtok(line, " ");
-		while (city_name != nullptr) {
-			auto new_city_index = (city_id_t)_city_names.size();
-			cluster_cities.push_back(new_city_index);
-			_city_names.emplace_back(string(city_name), cluster_id);
-			city_identifiers_mapping[string(city_name)] = new_city_index;
-			city_name = strtok(nullptr, " ");
+		int c = 0;
+
+		short in_city = 0;
+		while (c = getc(input)){
+
+			if (in_city == 3){
+				auto new_city_index = (city_id_t)_city_names.size();
+				cluster_cities.push_back(new_city_index);
+				_city_names.emplace_back(string(city_name), cluster_id);
+				city_identifiers_mapping[string(city_name)] = new_city_index;
+				in_city = -1;
+			}
+
+			if (c != ' ' && c != '\n') city_name[in_city] = (char) c;
+            else if (c == '\n') break;
+
+            ++in_city;
 		}
 
 		_clusters.push_back(move(cluster_cities));
