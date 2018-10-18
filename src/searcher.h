@@ -6,6 +6,8 @@
 #include "validator.h"
 
 #include <chrono>
+#include <string>
+#include <fstream>
 
 using energy_t = int;
 using temp_t = double;
@@ -13,8 +15,11 @@ using temp_t = double;
 class searcher
 {
 public:
-	searcher(const task& data, generator& g, validator& v, std::chrono::duration<int> available_time):
-		_data(data), _generator(g), _validator(v), _available_time(available_time) {}
+    searcher(const task &data, generator &g, validator &v, std::chrono::duration<int> available_time,
+             const std::string &stats_path) :
+            _data(data), _generator(g), _validator(v), _available_time(available_time) {
+        _stats = std::ofstream(stats_path);
+    }
 
 	const Solution& run();
 
@@ -26,8 +31,8 @@ public:
 private:
 
 	// ANNEALING PARAMS:
-	const temp_t INITIAL_TEMP = 50;
-	const float COOLING_TEMP = 0.99999999;
+    const temp_t INITIAL_TEMP = 0.3;
+    const double COOLING_TEMP = 0.99999997;
 	temp_t _t;
 
 	// general:
@@ -35,6 +40,7 @@ private:
 	generator& _generator;
 	validator& _validator;
 	const std::chrono::duration<int> _available_time;
+    std::ofstream _stats;
 };
 
 

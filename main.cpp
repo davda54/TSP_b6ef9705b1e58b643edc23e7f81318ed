@@ -1,4 +1,5 @@
-#include <fstream>
+#include <iostream>
+#include <stdio.h>
 
 #include "task.h"
 #include "test.h"
@@ -11,6 +12,9 @@ int main(int argc, char *argv[])
 	//test::check_performance();
 	
 	task t;
-	std::ifstream input(argv[1]);
-	t.run(input);	
+    FILE *file;
+    file = fopen(argv[1], "r");
+    if (file == nullptr) perror("Error opening file");
+    else t.run(file);
+    fclose(file);
 }

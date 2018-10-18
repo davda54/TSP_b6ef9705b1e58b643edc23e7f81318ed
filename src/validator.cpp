@@ -52,11 +52,16 @@ size_t validator::number_of_conflicts(const Solution& clusters)
 		any_available = any_available || next_city.available;
 	}
 
-	if (!any_available) ++conflicts;
+    if (!any_available) {
+        ++conflicts;
+        for (auto &&next_city : _city_available_cache[clusters[0]]) {
+            next_city.available = true;
+        }
+    }
 
 	for (size_t i = 1; i < _cluster_count - 1; ++i)
 	{
-		any_available = false;
+        any_available = false;
 		for (auto&& next_city : _city_available_cache[clusters[i]])
 		{
 			next_city.available = false;
@@ -73,14 +78,12 @@ size_t validator::number_of_conflicts(const Solution& clusters)
 			}
 		}
 
-		if (!any_available)
-		{
-			++conflicts;
-			for (auto&& next_city : _city_available_cache[clusters[i]])
-			{
-				next_city.available = true;
-			}
-		}
+        if (!any_available) {
+            ++conflicts;
+            for (auto &&next_city : _city_available_cache[clusters[i]]) {
+                next_city.available = true;
+            }
+        }
 	}
 
 	for (auto&& prev_city : _city_available_cache[clusters[_cluster_count - 2]])

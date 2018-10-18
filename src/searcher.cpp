@@ -1,6 +1,7 @@
 #include "searcher.h"
 #include <iostream>
 #include <cmath>
+#include <fstream>
 
 using namespace std;
 
@@ -8,9 +9,10 @@ using namespace std;
 const Solution& searcher::run()
 {
 	const auto start = chrono::steady_clock::now();
-	auto best = 0;
 
+    size_t i = 0;
 	_t = INITIAL_TEMP;
+    energy_t best = _data.cluster_count();
 	energy_t current = get_energy(_generator.generate_solution());
 	//const Solution* solution = &_generator.generate_solution();
 
@@ -33,18 +35,18 @@ const Solution& searcher::run()
 		}
 		else _generator.revert_one_step();
 
-		if(new_energy > best)
-		{
-			best = new_energy;
-			cout << best << endl;
-		}
+        // PRINT DEBUG
+        if (best > current) best = current;
+        if (i % 1 == 0)_stats << i << ' ' << current << ' ' << best << ' ' << _t << '\n';
+        // PRINT DEBUG
 
-		if(new_energy == _data.cluster_count())
+        if (current == _data.cluster_count())
 		{
 			return _generator.current_solution();
 		}
 
 		update_temperature();
+        ++i;
 	}
 
 

@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <stdio.h>
+
 #include "test.h"
 #include "task.h"
 #include "generator.h"
@@ -17,16 +19,18 @@ void test::check_performance()
 	check_performance("TSALESMAN2-4.in"); // best solutions: 1 711 945, cost: 2147483647
 }
 
-void test::check_performance(const std::string& path)
+void test::check_performance(const char *path)
 {
 	auto start = chrono::steady_clock::now();
 
-	std::ifstream f(path);
+    FILE *file;
+    file = fopen(path, "r");
+    if (file == nullptr) perror("Error opening file");
 
 	size_t solution_count = 0;
 
 	task t;
-	t.load(f);
+    t.load(file);
 
 	generator g(t);
 	validator v(t);
