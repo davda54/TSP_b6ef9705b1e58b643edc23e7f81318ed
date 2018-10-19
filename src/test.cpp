@@ -70,12 +70,12 @@ void test::check_performance(const char *path)
 
 	cout << "\r";
 	cout << "time average: " << avg_time << endl;
-	cout << "time variance: " << var_time << endl;
+	cout << "time std deviation: " << sqrt(var_time) << endl;
 	cout << "time min: " << min_time << endl;
 	cout << "time max: " << max_time << endl;
 
 	cout << "speed average: " << avg_speed << endl;
-	cout << "speed variance: " << var_speed << endl;
+	cout << "speed std deviation: " << sqrt(var_speed) << endl;
 	cout << "speed min: " << min_speed << endl;
 	cout << "speed max: " << max_speed << endl;
 
