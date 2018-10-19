@@ -15,8 +15,6 @@ using namespace std;
 
 void task::load(FILE *input) {
 
-	cout << "Reading input ..." << endl;
-
 	char start_identifier[4];
 	unsigned int cluster_count;
 	fscanf(input, "%u %s\n", &cluster_count, start_identifier);
@@ -67,9 +65,9 @@ void task::load(FILE *input) {
 		for (size_t i = 0; i < _city_count; ++i)
 		{
 			vector<cost_t> c(_city_count, INVALID_ROUTE);
-			b.push_back(c);
+			b.push_back(move(c));
 		}
-		_graph.push_back(b);
+		_graph.push_back(move(b));
 	}
 
 	char to_city[4];
@@ -94,7 +92,49 @@ void task::load(FILE *input) {
 	_start_city = city_identifiers_mapping[start_identifier[0] - 'A'][start_identifier[1] - 'A'][start_identifier[2] - 'A'];
 	_start_cluster = _city_names[_start_city].second;
 
-	cout << "Input reading done ..." << '\n';
+
+	// cluster to cluster route initialization
+
+	_cluster_to_cluster_conflict.reserve(_cluster_count);
+
+	for (size_t d = 0; d < _cluster_count; ++d)
+	{
+		vector<vector<char>> sub_vector;
+		sub_vector.reserve(_cluster_count);
+		for (size_t i = 0; i < _cluster_count; ++i)
+		{
+			vector<char> sub_sub_vector;
+			sub_sub_vector.reserve(_cluster_count);
+
+			for (size_t j = 0; j < _cluster_count; ++j)
+			{
+				if (i == j)
+				{
+					sub_sub_vector.push_back(0);
+					continue;
+				}
+
+				for(auto&& city_i: get_cluster_cities(i)) for(auto&& city_j: get_cluster_cities(j))
+				{
+					if(get_cost(city_i, city_j, d) != INVALID_ROUTE)
+					{
+						sub_sub_vector.push_back(0);
+						goto end_loop;
+					}
+				}
+				sub_sub_vector.push_back(1);
+
+				end_loop:;
+			}
+
+			sub_vector.push_back(move(sub_sub_vector));
+		}
+
+		_cluster_to_cluster_conflict.push_back(move(sub_vector));
+	}
+
+
+	cout << "Input reading done!" << '\n';
 }
 
 void task::run(FILE *input)

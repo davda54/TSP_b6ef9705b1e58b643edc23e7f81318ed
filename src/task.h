@@ -38,6 +38,11 @@ public:
         return _graph[day][from][to];
     }
 
+	char get_conflict(cluster_id_t from, cluster_id_t to, size_t day) const
+	{
+		return _cluster_to_cluster_conflict[day][from][to];
+	}
+
 	cluster_id_t get_start_cluster() const
 	{
 		return _start_cluster;
@@ -83,6 +88,7 @@ private:
     // TODO: udelej poradne!
     // first axis day, second city-from, third city-to
     std::vector<std::vector<std::vector<cost_t>>> _graph;
+	std::vector<std::vector<std::vector<char>>> _cluster_to_cluster_conflict;
 
     std::vector<std::vector<city_id_t >> _clusters;
     std::vector<std::pair<std::string, cluster_id_t >> _city_names;

@@ -200,6 +200,109 @@ size_t validator::number_of_conflicts(const Solution& clusters, size_t swapped_i
 	return _last_conflict_count;
 }
 
+size_t validator::number_of_conflicts(const Solution& clusters, size_t index_1, size_t index_2)
+{
+#ifdef _DEBUG
+	if (index_1 >= index_2) throw exception("error");
+#endif
+
+	bool any_available = false;
+	bool was_any_available = false;
+
+
+	// check the first cluster <=> it was swapped
+
+	if (index_1 == 0)
+	{
+		for (auto&& next_city : _city_available_cache[clusters[0]])
+		{
+			next_city.available = _data.get_cost(_start_city, next_city.city, 0) != INVALID_ROUTE;
+
+			any_available = any_available || next_city.available;
+			was_any_available = was_any_available || next_city.last_available;
+
+			next_city.last_available = any_available;
+		}
+	}
+
+	if (!was_any_available && any_available) --_last_conflict_count;
+	else if (was_any_available && !any_available) ++_last_conflict_count;
+
+	if (!any_available)
+	{
+		for (auto&& next_city : _city_available_cache[clusters[0]])
+		{
+			next_city.available = true;
+		}
+	}
+
+
+	// check clusters after both swapped clusters until no change detected
+
+	for (size_t i = max(size_t(index_1), size_t(1)); i < _cluster_count - 1; ++i)
+	{
+		bool any_change = false;
+		any_available = was_any_available = false;
+
+		for (auto&& next_city : _city_available_cache[clusters[i]])
+		{
+			next_city.available = false;
+
+			for (auto&& prev_city : _city_available_cache[clusters[i - 1]])
+			{
+				if (!prev_city.available) continue;
+
+				next_city.available = next_city.available || _data.get_cost(prev_city.city, next_city.city, i) != INVALID_ROUTE;
+			}
+
+			any_available = any_available || next_city.available;
+			was_any_available = was_any_available || next_city.last_available;
+			any_change = any_change || (next_city.available != next_city.last_available);
+
+			next_city.last_available = next_city.available;
+		}
+
+		if (!was_any_available && any_available) --_last_conflict_count;
+		else if (was_any_available && !any_available) ++_last_conflict_count;
+
+		if (!any_available)
+		{
+			for (auto&& next_city : _city_available_cache[clusters[i]])
+			{
+				next_city.available = true;
+			}
+		}
+
+		// end if no change was detected after the more distant swapped cluster
+		if (!any_change && i > index_2) return _last_conflict_count;
+
+		// check clusters after the more distant cluster if it was not checked already
+		if (!any_change && i > index_1) i = index_2;
+	}
+
+	was_any_available = any_available = false;
+	for (auto&& next_city : _city_available_cache[clusters[_cluster_count - 1]])
+	{
+		next_city.available = false;
+
+		for (auto&& prev_city : _city_available_cache[clusters[_cluster_count - 2]])
+		{
+			if (!prev_city.available) continue;
+
+			next_city.available = next_city.available || _data.get_cost(prev_city.city, next_city.city, _cluster_count - 1) != INVALID_ROUTE;
+		}
+
+		any_available = any_available || next_city.available;
+		was_any_available = was_any_available || next_city.last_available;
+
+		next_city.last_available = next_city.available;
+	}
+
+	if (!was_any_available && any_available) return --_last_conflict_count;
+	if (was_any_available && !any_available) return ++_last_conflict_count;
+	return _last_conflict_count;
+}
+
 // todo: rewrite to a dynamic programming solution
 
 bool validator::exist_route_recursive(city_id_t start, const Solution& clusters, size_t day)

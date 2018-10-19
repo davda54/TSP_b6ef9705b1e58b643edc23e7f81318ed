@@ -13,6 +13,7 @@ public:
 	size_t rnd_number(){ return _random_engine(); }
 	const Solution& generate_solution();
 	const Solution& generate_neighbor();
+	const Solution& generate_clever_neighbor();
 	const Solution& revert_one_step();
 	const Solution* swap(size_t index);
 

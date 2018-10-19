@@ -11,20 +11,23 @@ const Solution& searcher::run()
 	_t = INITIAL_TEMP;
 
 	_generator.generate_solution();
+
 	energy_t current = get_energy(_generator.current_solution());
 	energy_t best = current;
 	size_t count = 0;
 
 	while (chrono::steady_clock::now() - _start < _available_time)
 	{
-		const Solution& solution = _generator.generate_neighbor();
+		if (_generator.rnd_float() < 0.5f) _generator.generate_clever_neighbor();
+		else _generator.generate_neighbor();
 
+		const Solution& solution = _generator.current_solution();
 		auto new_energy = get_energy(solution, _generator.swapped_index());
 
 		if (new_energy < best)
 		{
 			best = new_energy;
-			//cout << endl << best << endl << "\t" << _t;
+			cout << endl << best << endl << "\t" << _t;
 		}
 
 		if(new_energy < current)
@@ -44,7 +47,7 @@ const Solution& searcher::run()
 		}
 
         // PRINT DEBUG
-        if (count % 1000 == 0)_stats << count << ' ' << current << ' ' << best << ' ' << _t << '\n';
+        //if (count % 1000 == 0)_stats << count << ' ' << current << ' ' << best << ' ' << _t << '\n';
         // PRINT DEBUG
 
 		if(new_energy == 0)
@@ -70,14 +73,14 @@ float searcher::acceptance_probability(energy_t current, energy_t next) const {
 
 energy_t searcher::get_energy(const Solution& s, size_t swapped_index) const {
 
-	//return _validator.number_of_conflicts(s, swapped_index);
-	return _validator.route_cost_approx(s, swapped_index);
+	// TODO: better cost function
+	return _validator.number_of_conflicts(s, swapped_index);
 }
 
 energy_t searcher::get_energy(const Solution& s) const {
 
-	//return _validator.number_of_conflicts(s);
-	return _validator.route_cost_approx(s);
+	// TODO: better cost function
+	return _validator.number_of_conflicts(s);
 }
 
 void searcher::update_temperature() {
@@ -86,7 +89,7 @@ void searcher::update_temperature() {
 
 	if((chrono::steady_clock::now() - _start).count() % 100000 == 0)
 	{
-		//cout << "\r\t" << _t;
+		cout << "\r\t" << _t;
 	}
 }
 
@@ -100,6 +103,7 @@ energy_t searcher::get_order_energy(const Solution *s, size_t start, size_t firs
 	size_t d = end % clusters;
 
 	return _data.get_cost()*/
+	return 0;
 }
 
 

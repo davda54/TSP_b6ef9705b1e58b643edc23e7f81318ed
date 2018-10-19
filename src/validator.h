@@ -39,10 +39,12 @@ public:
 
 	size_t number_of_conflicts(const Solution& clusters, size_t swapped_index);
 
+	size_t number_of_conflicts(const Solution& clusters, size_t index_1, size_t index_2);
+
 	total_cost_t route_cost_approx(const Solution& clusters);
 
 	total_cost_t route_cost_approx(const Solution& clusters, size_t swapped_index);
-	
+
 private:
 	const task &_data;
 	city_id_t _start_city;
