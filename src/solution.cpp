@@ -14,6 +14,8 @@ solution::solution(const task& data) : _data(data), _random_engine(random_device
 		_clusters.push_back(i);
 	}
 	_clusters.push_back(start_cluster);
+	shuffle(_clusters.begin(), _clusters.end() - 1, _random_engine);
+
 
 	_start_city = _data.get_start_city();
 

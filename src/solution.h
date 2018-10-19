@@ -16,6 +16,7 @@ public:
 	void submit_step();
 	total_cost_t cost();
 	std::vector<city_id_t> path();
+	const std::vector<cluster_id_t>& clusters() const { return _clusters; }
 
 private:
 	void simple_swap();
