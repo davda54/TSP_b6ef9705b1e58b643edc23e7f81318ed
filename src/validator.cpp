@@ -608,6 +608,9 @@ total_cost_t validator::route_cost_approx(const Solution &clusters, size_t swapp
 				_last_total_cost += new_min;
 				remove_tail = false;
 			}
+			if (old_state) {
+				remove_tail = true;
+			}
 		}
 		else {
 
@@ -667,6 +670,10 @@ total_cost_t validator::route_cost_approx(const Solution &clusters, size_t swapp
 				_last_total_cost -= old_min;
 				_last_total_cost += new_min;
 				remove_tail = false;
+				continue;
+			}
+			if (old_state) {
+				remove_tail = true;
 			}
 		}
 		else {
@@ -702,13 +709,14 @@ total_cost_t validator::route_cost_approx(const Solution &clusters, size_t swapp
 			_last_total_cost -= old_min;
 			_last_total_cost += new_min;
 		}
+		else {
 
-		if (remove_tail) {
-
-			if (!old_state) _last_total_cost += new_min;
-			else _last_total_cost -= old_min;
+			if (remove_tail) {
+				if (!old_state) _last_total_cost += new_min;
+				else _last_total_cost -= old_min;
+			}
 		}
 	}
 
-	return _last_conflict_count;
+	return _last_total_cost;
 }
