@@ -38,6 +38,7 @@ public:
 
 	size_t number_of_conflicts(const Solution& clusters, size_t swapped_index);
 
+	size_t number_of_conflicts(const Solution& clusters, size_t index_1, size_t index_2);
 	
 private:
 	const task &_data;

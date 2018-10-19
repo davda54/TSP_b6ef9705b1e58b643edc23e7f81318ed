@@ -18,7 +18,7 @@ const Solution& searcher::run()
 
 	while (chrono::steady_clock::now() - _start < _available_time)
 	{
-		if (_generator.rnd_float() < 0.1f) _generator.generate_clever_neighbor();
+		if (_generator.rnd_float() < 0.5f) _generator.generate_clever_neighbor();
 		else _generator.generate_neighbor();
 
 		const Solution& solution = _generator.current_solution();
