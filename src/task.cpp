@@ -15,6 +15,8 @@ using namespace std;
 
 void task::load(FILE *input) {
 
+	cout << "Reading input ..." << endl;
+
 	char start_identifier[4];
 	unsigned int cluster_count;
 	fscanf(input, "%u %s\n", &cluster_count, start_identifier);
@@ -92,7 +94,7 @@ void task::load(FILE *input) {
 	_start_city = city_identifiers_mapping[start_identifier[0] - 'A'][start_identifier[1] - 'A'][start_identifier[2] - 'A'];
 	_start_cluster = _city_names[_start_city].second;
 
-	cout << "Input reading done!" << '\n';
+	cout << "Input reading done ..." << '\n';
 }
 
 void task::run(FILE *input)
@@ -142,7 +144,7 @@ chrono::duration<int> task::get_available_time() const
 	int clusters = cluster_count();
 	int airports = get_number_of_cities();
 
-	if (clusters <= 20 && airports < 50) return chrono::duration<int>(60);
-	if (clusters <= 100 && airports < 200) return chrono::duration<int>(60);
-	return chrono::duration<int>(720);
+	if (clusters <= 20 && airports < 50) return chrono::duration<int>(5);
+	if (clusters <= 100 && airports < 200) return chrono::duration<int>(15);
+	return chrono::duration<int>(30);
 }

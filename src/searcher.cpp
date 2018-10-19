@@ -18,12 +18,13 @@ const Solution& searcher::run()
 	while (chrono::steady_clock::now() - _start < _available_time)
 	{
 		const Solution& solution = _generator.generate_neighbor();
+
 		auto new_energy = get_energy(solution, _generator.swapped_index());
 
 		if (new_energy < best)
 		{
 			best = new_energy;
-			cout << endl << best << endl << "\t" << _t;
+			//cout << endl << best << endl << "\t" << _t;
 		}
 
 		if(new_energy < current)
@@ -56,7 +57,8 @@ const Solution& searcher::run()
 	}
 
 	cout << endl << endl << "time: " << (chrono::steady_clock::now() - _start).count() / 1000000.0 << " ms" << endl;
-	cout << "permutations: " << count << endl << endl;
+	cout << "permutations: " << count << endl;
+	cout << "best energy: " << best << endl << endl;
 	return _generator.current_solution();
 }
 
@@ -68,14 +70,14 @@ float searcher::acceptance_probability(energy_t current, energy_t next) const {
 
 energy_t searcher::get_energy(const Solution& s, size_t swapped_index) const {
 
-	// TODO: better cost function
-	return _validator.number_of_conflicts(s, swapped_index);
+	//return _validator.number_of_conflicts(s, swapped_index);
+	return _validator.route_cost_approx(s, swapped_index);
 }
 
 energy_t searcher::get_energy(const Solution& s) const {
 
-	// TODO: better cost function
-	return _validator.number_of_conflicts(s);
+	//return _validator.number_of_conflicts(s);
+	return _validator.route_cost_approx(s);
 }
 
 void searcher::update_temperature() {
@@ -84,7 +86,7 @@ void searcher::update_temperature() {
 
 	if((chrono::steady_clock::now() - _start).count() % 100000 == 0)
 	{
-		cout << "\r\t" << _t;
+		//cout << "\r\t" << _t;
 	}
 }
 
