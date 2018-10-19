@@ -3,11 +3,9 @@
 #include <iostream>
 #include <unordered_map>
 
-#include <string.h>
 #include <stdio.h>
 
 #include "validator.h"
-#include "generator.h"
 #include "searcher.h"
 
 using namespace std;
@@ -132,9 +130,6 @@ void task::load(FILE *input) {
 
 		_cluster_to_cluster_conflict.push_back(move(sub_vector));
 	}
-
-
-	cout << "Input reading done!" << '\n';
 }
 
 void task::run(FILE *input)
@@ -145,8 +140,11 @@ void task::run(FILE *input)
 
 	const auto max_duration = get_available_time();
 
-	searcher s(*this, max_duration, "stats.out", start);
+	searcher s(*this, max_duration, "stats.out");
 	const Solution& solution = s.run();
+
+	cout << endl << endl << "time: " << s.time.count() / 1000000.0 << " ms" << endl;
+	cout << "permutations: " << s.permutations << endl << endl;
 
 	validator v(*this);
 	auto route = v.find_route(solution);
@@ -182,7 +180,7 @@ chrono::duration<int> task::get_available_time() const
 	int clusters = cluster_count();
 	int airports = get_number_of_cities();
 
-	if (clusters <= 20 && airports < 50) return chrono::duration<int>(60);
-	if (clusters <= 100 && airports < 200) return chrono::duration<int>(60);
-	return chrono::duration<int>(720);
+	if (clusters <= 20 && airports < 50) return chrono::duration<int>(3);
+	if (clusters <= 100 && airports < 200) return chrono::duration<int>(5);
+	return chrono::duration<int>(15);
 }

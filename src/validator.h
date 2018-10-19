@@ -4,7 +4,8 @@
 #include <vector>
 #include "task.h"
 
-const int N = 300;
+
+using Solution = std::vector<cluster_id_t>;
 
 struct city_available_struct
 {

@@ -15,11 +15,12 @@ using temp_t = double;
 class searcher
 {
 public:
-	searcher(const task& data, std::chrono::duration<int> available_time, const std::string& stats_path,
-	         std::chrono::steady_clock::time_point start);
+	searcher(const task& data, std::chrono::duration<int> available_time, const std::string& stats_path);
 
-	Solution run();
+	std::vector<cluster_id_t> run();
 
+	size_t permutations;
+	duration_t time;
 
 private:
 
@@ -34,8 +35,8 @@ private:
 	// general:
 	const task& _data;
 	const std::chrono::duration<int> _available_time;
-	const std::chrono::steady_clock::time_point _start;
     std::ofstream _stats;
+	std::chrono::time_point<std::chrono::steady_clock> _start;
 };
 
 

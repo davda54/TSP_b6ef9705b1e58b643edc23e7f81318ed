@@ -10,20 +10,21 @@
 using namespace std;
 
 
-searcher::searcher(const task& data, std::chrono::duration<int> available_time, const std::string& stats_path, std::chrono::steady_clock::time_point start): _data(data), _available_time(available_time), _start(start)
+searcher::searcher(const task& data, std::chrono::duration<int> available_time, const std::string& stats_path): _data(data), _available_time(available_time)
 {
-	_stats = std::ofstream(stats_path);
+	//_stats = std::ofstream(stats_path);
 }
 
-Solution searcher::run()
+vector<cluster_id_t> searcher::run()
 {
+	_start = chrono::steady_clock::now();
 	_t = INITIAL_TEMP;
-
 	solution s(_data);
 
 	energy_t current_energy = s.cost();
 	energy_t best_energy = current_energy;
-	size_t count = 0;
+
+	permutations = 0;
 
 	while (chrono::steady_clock::now() - _start < _available_time)
 	{
@@ -34,7 +35,7 @@ Solution searcher::run()
 		if (new_energy < best_energy)
 		{
 			best_energy = new_energy;
-			cout << endl << best_energy << endl << "\t" << _t;
+			//\cout << endl << best_energy << endl << "\t" << _t;
 		}
 
 		if(new_energy < current_energy)
@@ -65,12 +66,11 @@ Solution searcher::run()
 			break;
 		}
 
-		count++;
+		++permutations;
 		update_temperature();
 	}
 
-	cout << endl << endl << "time: " << (chrono::steady_clock::now() - _start).count() / 1000000.0 << " ms" << endl;
-	cout << "permutations: " << count << endl << endl;
+	time = chrono::steady_clock::now() - _start;
 
 	return s.clusters();
 }
@@ -84,8 +84,8 @@ void searcher::update_temperature()
 {
 	_t *= COOLING_TEMP;
 
-	if((chrono::steady_clock::now() - _start).count() % 100000 == 0)
+	/*if((chrono::steady_clock::now() - _start).count() % 100000 == 0)
 	{
 		cout << "\r\t" << _t;
-	}
+	}*/
 }
