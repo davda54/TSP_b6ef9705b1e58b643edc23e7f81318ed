@@ -29,6 +29,10 @@ private:
 		_clusters[_swapped_1] ^= _clusters[_swapped_2];
 	}
 
+	void initialize_cost();
+	void calculate_cost();
+
+
 	struct city_available_struct
 	{
 		city_available_struct(city_id_t city, bool available, bool last_available) : city(city), available(available), last_available(last_available) {}

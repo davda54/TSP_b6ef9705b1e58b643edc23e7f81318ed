@@ -29,17 +29,20 @@ solution::solution(const task& data) : _data(data), _random_engine(random_device
 		}
 		_city_available_cache.push_back(move(cities_available));
 	}
+
+	initialize_cost();
 }
 
 void solution::permute()
 {
 	simple_swap();
+	calculate_cost();
 }
 
 void solution::revert_step()
 {
 	swap();
-	cost();
+	calculate_cost();
 }
 
 void solution::submit_step()
@@ -47,6 +50,75 @@ void solution::submit_step()
 }
 
 total_cost_t solution::cost()
+{
+	return _last_conflict_count;
+}
+
+void solution::simple_swap()
+{
+	_swapped_1 = _random_engine() % (_cluster_count - 1);
+	_swapped_2 = (_swapped_1 + 1) % (_cluster_count - 1);
+
+	if(_swapped_1 > _swapped_2)
+	{
+		_swapped_1 ^= _swapped_2;
+		_swapped_2 ^= _swapped_1;
+		_swapped_1 ^= _swapped_2;
+	}
+
+	swap();
+}
+
+void solution::initialize_cost()
+{
+	_last_conflict_count = 0;
+
+	bool any_available = false;
+	for (auto&& next_city : _city_available_cache[_clusters[0]])
+	{
+		next_city.last_available = next_city.available = _data.get_cost(_start_city, next_city.city, 0) != INVALID_ROUTE;
+		any_available = any_available || next_city.available;
+	}
+
+	if (!any_available)
+	{
+		++_last_conflict_count;
+		for (auto&& next_city : _city_available_cache[_clusters[0]])
+		{
+			next_city.available = true;
+		}
+	}
+
+	for (size_t i = 1; i < _cluster_count; ++i)
+	{
+		any_available = false;
+		for (auto&& next_city : _city_available_cache[_clusters[i]])
+		{
+			next_city.available = false;
+
+			for (auto&& prev_city : _city_available_cache[_clusters[i - 1]])
+			{
+				if (!prev_city.available) continue;
+
+				next_city.available = next_city.available || _data.get_cost(prev_city.city, next_city.city, i) != INVALID_ROUTE;
+			}
+
+			any_available = any_available || next_city.available;
+			next_city.last_available = next_city.available;
+		}
+
+		if (!any_available)
+		{
+			++_last_conflict_count;
+			for (auto&& next_city : _city_available_cache[_clusters[i]])
+			{
+				next_city.available = true;
+			}
+		}
+	}
+}
+
+void solution::calculate_cost()
 {
 #ifdef _DEBUG
 	if (_swapped_1 >= _swapped_2) throw exception("error");
@@ -120,7 +192,7 @@ total_cost_t solution::cost()
 		}
 
 		// end if no change was detected after the more distant swapped cluster
-		if (!any_change && i > _swapped_2) return _last_conflict_count;
+		if (!any_change && i > _swapped_2) return;
 
 		// check clusters after the more distant cluster if it was not checked already
 		if (!any_change && i > _swapped_1) i = _swapped_2;
@@ -144,22 +216,6 @@ total_cost_t solution::cost()
 		next_city.last_available = next_city.available;
 	}
 
-	if (!was_any_available && any_available) return --_last_conflict_count;
-	if (was_any_available && !any_available) return ++_last_conflict_count;
-	return _last_conflict_count;
-}
-
-void solution::simple_swap()
-{
-	_swapped_1 = _random_engine() % (_cluster_count - 1);
-	_swapped_2 = (_swapped_1 + 1) % (_cluster_count - 1);
-
-	if(_swapped_1 > _swapped_2)
-	{
-		_swapped_1 ^= _swapped_2;
-		_swapped_2 ^= _swapped_1;
-		_swapped_1 ^= _swapped_2;
-	}
-
-	swap();
+	if (!was_any_available && any_available) --_last_conflict_count;
+	if (was_any_available && !any_available) ++_last_conflict_count;
 }

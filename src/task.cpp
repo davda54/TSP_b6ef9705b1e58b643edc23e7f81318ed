@@ -145,12 +145,10 @@ void task::run(FILE *input)
 
 	const auto max_duration = get_available_time();
 
-	generator g(*this);
-	validator v(*this);
-	searcher s(*this, g, v, max_duration, "stats.out", start);
-
+	searcher s(*this, max_duration, "stats.out", start);
 	const Solution& solution = s.run();
 
+	validator v(*this);
 	auto route = v.find_route(solution);
 	
 	cout << v.route_cost(solution) << endl;

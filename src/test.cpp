@@ -21,37 +21,36 @@ void test::check_performance()
 
 void test::check_performance(const char *path)
 {
-	auto start = chrono::steady_clock::now();
+	//auto start = chrono::steady_clock::now();
 
-    FILE *file;
-    file = fopen(path, "r");
-    if (file == nullptr) perror("Error opening file");
+ //   FILE *file;
+ //   file = fopen(path, "r");
+ //   if (file == nullptr) perror("Error opening file");
 
-	size_t solution_count = 0;
+	//size_t solution_count = 0;
 
-	task t;
-    t.load(file);
+	//task t;
+ //   t.load(file);
 
-	generator g(t);
-	validator v(t);
+	//validator v(t);
 
-	auto max_duration = t.get_available_time();
-	total_cost_t best_price = INT32_MAX;
+	//auto max_duration = t.get_available_time();
+	//total_cost_t best_price = INT32_MAX;
 
-	while (chrono::steady_clock::now() - start < max_duration)
-	{
-		auto solution = g.generate_solution();
+	//while (chrono::steady_clock::now() - start < max_duration)
+	//{
+	//	auto solution = g.generate_solution();
 
-		solution_count++;
+	//	solution_count++;
 
-		if (!v.exist_route(solution)) continue;
-		//else cout << "ha";
-		auto price = v.route_cost(solution);
-		if (price < best_price)
-		{
-			best_price = price;
-		}
-	}
+	//	if (!v.exist_route(solution)) continue;
+	//	//else cout << "ha";
+	//	auto price = v.route_cost(solution);
+	//	if (price < best_price)
+	//	{
+	//		best_price = price;
+	//	}
+	//}
 
-	cout << path << ": clusters: " << t.cluster_count() << ",\tsolutions: " << solution_count << ",\tcost: " << best_price << endl;
+	//cout << path << ": clusters: " << t.cluster_count() << ",\tsolutions: " << solution_count << ",\tcost: " << best_price << endl;
 }
