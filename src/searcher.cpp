@@ -35,33 +35,24 @@ vector<cluster_id_t> searcher::run()
 		if (new_energy < best_energy)
 		{
 			best_energy = new_energy;
-			//\cout << endl << best_energy << endl << "\t" << _t;
+			cout << endl << best_energy << endl << "\t" << _t;
 		}
 
-		if(new_energy < current_energy)
+		if (new_energy < current_energy || acceptance_probability(current_energy, new_energy) > generator::rnd_float())
 		{
 			current_energy = new_energy;
+			s.submit_step();
 		}
 		else
 		{
-			float p = acceptance_probability(current_energy, new_energy);
-
-			if (p > generator::rnd_float()) 
-			{
-				current_energy = new_energy;
-				s.submit_step();
-			}
-			else
-			{
-				s.revert_step();
-			}
+			s.revert_step();
 		}
 
-        // PRINT DEBUG
-        //if (count % 1000 == 0)_stats << count << ' ' << current << ' ' << best << ' ' << _t << '\n';
-        // PRINT DEBUG
+		// PRINT DEBUG
+		//if (count % 1000 == 0)_stats << count << ' ' << current << ' ' << best << ' ' << _t << '\n';
+		// PRINT DEBUG
 
-		if(new_energy == 0)
+		if (new_energy == 0)
 		{
 			break;
 		}

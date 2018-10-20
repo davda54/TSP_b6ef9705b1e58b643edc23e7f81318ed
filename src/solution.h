@@ -14,7 +14,7 @@ public:
 	void permute();
 	void revert_step();
 	void submit_step();
-	total_cost_t cost();
+	total_cost_t cost() { return _conflict_count; }
 	std::vector<city_id_t> path();
 	const std::vector<cluster_id_t>& clusters() const { return _clusters; }
 
@@ -50,13 +50,12 @@ private:
 
 	std::mt19937 _random_engine;
 	std::uniform_real_distribution<float> _uniform_dist;
-	size_t _swapped_1;
-	size_t _swapped_2;
+	int _swapped_1, _swapped_2;
+	int _last_checked_1, _last_checked_2;
 
 	city_id_t _start_city;
+	size_t _conflict_count;
 	size_t _last_conflict_count;
-
-	
 };
 
 #endif

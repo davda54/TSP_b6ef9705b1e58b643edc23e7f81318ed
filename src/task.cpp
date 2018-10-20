@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <unordered_map>
-
+#include <string.h>
 #include <stdio.h>
 
 #include "validator.h"
@@ -143,7 +143,7 @@ void task::run(FILE *input)
 	searcher s(*this, max_duration, "stats.out");
 	const Solution& solution = s.run();
 
-	cout << endl << endl << "time: " << s.time.count() / 1000000.0 << " ms" << endl;
+	cout << "time: " << s.time.count() / 1000000.0 << " ms" << endl;
 	cout << "permutations: " << s.permutations << endl << endl;
 
 	validator v(*this);
@@ -182,5 +182,5 @@ chrono::duration<int> task::get_available_time() const
 
 	if (clusters <= 20 && airports < 50) return chrono::duration<int>(3);
 	if (clusters <= 100 && airports < 200) return chrono::duration<int>(5);
-	return chrono::duration<int>(15);
+	return chrono::duration<int>(30);
 }

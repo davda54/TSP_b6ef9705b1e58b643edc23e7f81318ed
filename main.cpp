@@ -1,4 +1,3 @@
-#include <iostream>
 #include <stdio.h>
 
 #include "task.h"
@@ -9,12 +8,12 @@ using namespace std;
 
 int main(int argc, char *argv[]) 
 {
-	test::check_performance();
+	//test::check_performance();
 	
-	/*task t;
+	task t;
     FILE *file;
     file = fopen(argv[1], "r");
     if (file == nullptr) perror("Error opening file");
     else t.run(file);
-    fclose(file);*/
+    fclose(file);
 }
