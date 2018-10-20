@@ -5,8 +5,8 @@
 #include <tuple>
 #include <chrono>
 
-using city_id_t = unsigned short;
-using cluster_id_t = unsigned short;
+using city_id_t = int;
+using cluster_id_t = int;
 using cost_t = unsigned short;
 using total_cost_t = int;
 using duration_t = std::chrono::duration<long long, std::ratio<1, 1000000000>>;

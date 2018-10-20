@@ -43,30 +43,29 @@ void solution::permute()
 void solution::revert_step()
 {
 	swap();
-	calculate_cost();
 
-	//_conflict_count = _last_conflict_count;
+	_conflict_count = _last_conflict_count;
 }
 
 void solution::submit_step()
 {
 	_last_conflict_count = _conflict_count;
 
-	//for (auto i = _swapped_1; i <= _last_checked_1; ++i)
-	//{
-	//	for (auto&& city : _city_available_cache[_clusters[i]])
-	//	{
-	//		city.last_available = city.available;
-	//	}
-	//}
+	for (auto i = _swapped_1; i <= _last_checked_1; ++i)
+	{
+		for (auto&& city : _city_available_cache[_clusters[i]])
+		{
+			city.last_available = city.available;
+		}
+	}
 
-	//for (auto i = _swapped_2; i <= _last_checked_2; ++i)
-	//{
-	//	for (auto&& city : _city_available_cache[_clusters[i]])
-	//	{
-	//		city.last_available = city.available;
-	//	}
-	//}
+	for (auto i = _swapped_2; i <= _last_checked_2; ++i)
+	{
+		for (auto&& city : _city_available_cache[_clusters[i]])
+		{
+			city.last_available = city.available;
+		}
+	}
 }
 
 void solution::simple_swap()
