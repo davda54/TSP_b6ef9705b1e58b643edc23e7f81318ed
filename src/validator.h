@@ -17,11 +17,12 @@ struct city_available_struct
 
 struct city_cost_struct
 {
-	city_cost_struct(city_id_t city, total_cost_t total_cost, total_cost_t last_total_cost) : city(city), total_cost(total_cost) {}
+	city_cost_struct(city_id_t city, total_cost_t total_cost, total_cost_t last_total_cost, int difference) : city(city), total_cost(total_cost), difference(difference) {}
 
 	const city_id_t city;
 	total_cost_t total_cost;
 	total_cost_t last_total_cost;
+	int difference;
 };
 
 class validator {
@@ -43,13 +44,12 @@ public:
 
 	total_cost_t route_cost_approx(const Solution& clusters);
 
-	total_cost_t route_cost_approx(const Solution& clusters, size_t swapped_index);
+	total_cost_t route_cost_approx(const Solution& clusters, int swapped_index);
 
 private:
 	const task &_data;
 	city_id_t _start_city;
 	size_t _cluster_count;
-	std::vector<std::vector<city_available_struct>> _city_exist_cache;
 
 	std::vector<std::vector<city_available_struct>> _city_available_cache;
 	std::vector<std::vector<city_cost_struct>> _city_cost_cache;
