@@ -23,6 +23,7 @@ vector<cluster_id_t> searcher::run()
 
 	energy_t current_energy = s.cost();
 	energy_t best_energy = current_energy;
+	vector<cluster_id_t> best_solution = s.copy_clusters();
 
 	permutations = 0;
 
@@ -35,6 +36,7 @@ vector<cluster_id_t> searcher::run()
 		if (new_energy < best_energy)
 		{
 			best_energy = new_energy;
+			best_solution = s.copy_clusters();
 			cout << endl << best_energy << endl << "\t" << _t;
 		}
 
@@ -52,18 +54,13 @@ vector<cluster_id_t> searcher::run()
 		//if (count % 1000 == 0)_stats << count << ' ' << current << ' ' << best << ' ' << _t << '\n';
 		// PRINT DEBUG
 
-		if (new_energy == 0)
-		{
-			break;
-		}
-
 		++permutations;
-		update_temperature();
+		update_temperature(new_energy);
 	}
 
 	time = chrono::steady_clock::now() - _start;
 
-	return s.clusters();
+	return best_solution;
 }
 
 float searcher::acceptance_probability(energy_t current, energy_t next) const 
@@ -71,12 +68,12 @@ float searcher::acceptance_probability(energy_t current, energy_t next) const
 	return (float) exp(-(float)(next - current) / _t);
 }
 
-void searcher::update_temperature() 
+void searcher::update_temperature(int e) 
 {
 	_t *= COOLING_TEMP;
 
-	/*if((chrono::steady_clock::now() - _start).count() % 100000 == 0)
+	if((chrono::steady_clock::now() - _start).count() % 100000 == 0)
 	{
-		cout << "\r\t" << _t;
-	}*/
+		cout << "\r" << e << "\t" << _t;
+	}
 }

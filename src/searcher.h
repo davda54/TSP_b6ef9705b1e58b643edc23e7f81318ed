@@ -25,11 +25,11 @@ public:
 private:
 
 	float acceptance_probability(energy_t current, energy_t next) const;
-	void update_temperature();
+	void update_temperature(int e);
 
 	// ANNEALING PARAMS:
-	const temp_t INITIAL_TEMP = 0.3; //best: 0.3
-	const double COOLING_TEMP = 0.99999997; // best: 0.99999997
+	const temp_t INITIAL_TEMP = 40000; //best: 0.3
+	const double COOLING_TEMP = 0.9999999; // best: 0.9999995
 	temp_t _t;
 
 	// general:

@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "task.h"
+#include "validator.h"
 
 class solution
 {
@@ -14,9 +15,10 @@ public:
 	void permute();
 	void revert_step();
 	void submit_step();
-	total_cost_t cost() { return _conflict_count; }
+	total_cost_t cost() { return _route_cost; }
 	std::vector<city_id_t> path();
 	const std::vector<cluster_id_t>& clusters() const { return _clusters; }
+	std::vector<cluster_id_t> copy_clusters() const { return _clusters; }
 
 private:
 	void simple_swap();
@@ -33,29 +35,30 @@ private:
 	void calculate_cost();
 
 
-	struct city_available_struct
+	struct city_cost_struct
 	{
-		city_available_struct(city_id_t city, bool available, bool last_available) : city(city), available(available), last_available(last_available) {}
+		city_cost_struct(city_id_t city, total_cost_t tmp_cost, total_cost_t cost, int gain) : city(city), tmp_cost(tmp_cost), cost(cost), gain(gain) {}
 
 		const city_id_t city;
-		bool available;
-		bool last_available;
+		total_cost_t tmp_cost;
+		total_cost_t cost;
+		int gain;
 	};
+
+	validator _validator;
 
 	std::vector<cluster_id_t> _clusters;
 	size_t _cluster_count;
-	std::vector<std::vector<city_available_struct>> _city_available_cache;
+	std::vector<std::vector<city_cost_struct>> _city_cost_cache;
 
 	const task& _data;
 
 	std::mt19937 _random_engine;
 	std::uniform_real_distribution<float> _uniform_dist;
 	int _swapped_1, _swapped_2;
-	int _last_checked_1, _last_checked_2;
 
 	city_id_t _start_city;
-	size_t _conflict_count;
-	size_t _last_conflict_count;
+	total_cost_t _route_cost;
 };
 
 #endif
