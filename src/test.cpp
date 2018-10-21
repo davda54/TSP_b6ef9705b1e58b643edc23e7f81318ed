@@ -3,7 +3,7 @@
 
 #include "test.h"
 #include "task.h"
-#include "searcher.h"
+#include "annealing.h"
 
 
 using namespace std;
@@ -44,7 +44,7 @@ void test::check_performance(const char *path)
 	{
 		cout << "\r" << i;
 
-		searcher s(t, max_duration, "stats.out");
+		annealing s(t, max_duration, "stats.out");
 		s.run();
 
 

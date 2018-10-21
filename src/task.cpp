@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 #include "validator.h"
-#include "searcher.h"
+#include "annealing.h"
 
 using namespace std;
 
@@ -140,7 +140,7 @@ void task::run(FILE *input)
 
 	const auto max_duration = get_available_time();
 
-	searcher s(*this, max_duration, "stats.out");
+	annealing s(*this, max_duration, "stats.out");
 	const Solution& solution = s.run();
 
 	cout << "time: " << s.time.count() / 1000000.0 << " ms" << endl;

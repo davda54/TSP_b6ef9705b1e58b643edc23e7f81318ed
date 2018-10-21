@@ -1,4 +1,4 @@
-#include "searcher.h"
+#include "annealing.h"
 
 #include "solution.h"
 #include "generator.h"
@@ -10,12 +10,12 @@
 using namespace std;
 
 
-searcher::searcher(const task& data, std::chrono::duration<int> available_time, const std::string& stats_path): _data(data), _available_time(available_time)
+annealing::annealing(const task& data, std::chrono::duration<int> available_time, const std::string& stats_path): _data(data), _available_time(available_time)
 {
 	//_stats = std::ofstream(stats_path);
 }
 
-vector<cluster_id_t> searcher::run()
+vector<cluster_id_t> annealing::run()
 {
 	_start = chrono::steady_clock::now();
 	_t = INITIAL_TEMP;
@@ -63,12 +63,12 @@ vector<cluster_id_t> searcher::run()
 	return best_solution;
 }
 
-float searcher::acceptance_probability(energy_t current, energy_t next) const 
+float annealing::acceptance_probability(energy_t current, energy_t next) const
 {
 	return (float) exp(-(float)(next - current) / _t);
 }
 
-void searcher::update_temperature(int e) 
+void annealing::update_temperature(int e)
 {
 	_t *= COOLING_TEMP;
 

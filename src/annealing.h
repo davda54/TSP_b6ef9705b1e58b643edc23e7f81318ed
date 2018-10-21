@@ -12,10 +12,10 @@
 using energy_t = int;
 using temp_t = double;
 
-class searcher
+class annealing
 {
 public:
-	searcher(const task& data, std::chrono::duration<int> available_time, const std::string& stats_path);
+	annealing(const task& data, std::chrono::duration<int> available_time, const std::string& stats_path);
 
 	std::vector<cluster_id_t> run();
 
