@@ -16,7 +16,7 @@ class annealing
 public:
 	annealing(const task& data, std::chrono::duration<int> available_time, const std::string& stats_path);
 
-	std::vector<cluster_id_t> run();
+	void run(solution& s);
 
 	size_t permutations;
 	duration_t time;

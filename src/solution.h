@@ -16,6 +16,7 @@ public:
 	void submit_step();
 	total_cost_t cost() { return _route_cost; }
 	std::vector<city_id_t> path();
+	void set_clusters(std::vector<cluster_id_t>&& clusters);
 	const std::vector<cluster_id_t>& clusters() const { return _clusters; }
 	std::vector<cluster_id_t> copy_clusters() const { return _clusters; }
 

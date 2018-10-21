@@ -51,6 +51,12 @@ void solution::submit_step()
 
 }
 
+void solution::set_clusters(std::vector<cluster_id_t>&& clusters)
+{
+	_clusters = move(clusters);
+	initialize_cost();
+}
+
 void solution::simple_swap()
 {
 	_swapped_1 = generator::rnd_int() % (_cluster_count - 1);

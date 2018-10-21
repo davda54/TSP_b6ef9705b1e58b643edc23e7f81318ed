@@ -15,11 +15,10 @@ annealing::annealing(const task& data, std::chrono::duration<int> available_time
 	//_stats = std::ofstream(stats_path);
 }
 
-vector<cluster_id_t> annealing::run()
+void annealing::run(solution& s)
 {
 	_start = chrono::steady_clock::now();
 	_t = INITIAL_TEMP;
-	solution s(_data);
 
 	energy_t current_energy = s.cost();
 	energy_t best_energy = current_energy;
@@ -60,7 +59,7 @@ vector<cluster_id_t> annealing::run()
 
 	time = chrono::steady_clock::now() - _start;
 
-	return best_solution;
+	s.set_clusters(move(best_solution));
 }
 
 float annealing::acceptance_probability(energy_t current, energy_t next) const

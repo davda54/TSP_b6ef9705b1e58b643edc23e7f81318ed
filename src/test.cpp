@@ -45,7 +45,8 @@ void test::check_performance(const char *path)
 		cout << "\r" << i;
 
 		annealing s(t, max_duration, "stats.out");
-		s.run();
+		solution solution(t);
+		s.run(solution);
 
 
 		auto time = s.time.count() / 1000000000.0f;
