@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "task.h"
-#include "validator.h"
 
 class solution
 {
@@ -37,15 +36,12 @@ private:
 
 	struct city_cost_struct
 	{
-		city_cost_struct(city_id_t city, total_cost_t tmp_cost, total_cost_t cost, int gain) : city(city), tmp_cost(tmp_cost), cost(cost), gain(gain) {}
+		city_cost_struct(city_id_t city, total_cost_t cost, int gain) : city(city), cost(cost), gain(gain) {}
 
 		const city_id_t city;
-		total_cost_t tmp_cost;
 		total_cost_t cost;
 		int gain;
 	};
-
-	validator _validator;
 
 	std::vector<cluster_id_t> _clusters;
 	size_t _cluster_count;
