@@ -43,7 +43,7 @@ void solution::permute()
 void solution::revert_step()
 {
 	swap();
-	calculate_cost();
+	//calculate_cost();
 }
 
 void solution::submit_step()
@@ -102,6 +102,9 @@ void solution::calculate_cost()
 #ifdef _DEBUG
 	if (_swapped_1 >= _swapped_2) throw exception("error");
 #endif
+
+	initialize_cost();
+	return;
 
 	if (_swapped_1 == 0 && _swapped_2 == _cluster_count - 2) 
 	{

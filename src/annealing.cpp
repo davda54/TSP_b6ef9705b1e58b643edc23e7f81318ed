@@ -55,7 +55,7 @@ vector<cluster_id_t> annealing::run()
 		// PRINT DEBUG
 
 		++permutations;
-		update_temperature(new_energy);
+		update_temperature();
 	}
 
 	time = chrono::steady_clock::now() - _start;
@@ -68,12 +68,12 @@ float annealing::acceptance_probability(energy_t current, energy_t next) const
 	return (float) exp(-(float)(next - current) / _t);
 }
 
-void annealing::update_temperature(int e)
+void annealing::update_temperature()
 {
 	_t *= COOLING_TEMP;
 
 	if((chrono::steady_clock::now() - _start).count() % 100000 == 0)
 	{
-		cout << "\r" << e << "\t" << _t;
+		cout << "\r\t" << _t;
 	}
 }
