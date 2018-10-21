@@ -1,12 +1,13 @@
 #include "task.h"
 
+
 #include <iostream>
 #include <unordered_map>
-#include <string.h>
 #include <stdio.h>
+#include <string>
 
-#include "validator.h"
 #include "annealing.h"
+#include "validator.h"
 
 using namespace std;
 
@@ -38,7 +39,7 @@ void task::load(FILE *input) {
 			if (in_city == 3){
 				auto new_city_index = (city_id_t)_city_names.size();
 				cluster_cities.push_back(new_city_index);
-				_city_names.emplace_back(string(city_name), cluster_id);
+				_city_names.emplace_back(std::string(city_name, 3), cluster_id);
 				city_identifiers_mapping[city_name[0] - 'A'][city_name[1] - 'A'][city_name[2] - 'A'] = new_city_index;
 				in_city = -1;
 			}

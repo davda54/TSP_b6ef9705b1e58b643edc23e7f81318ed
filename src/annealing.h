@@ -2,10 +2,9 @@
 #define TSP_CHALLENGE_KIWI_SEARCHER_H
 
 #include "task.h"
-
 #include "solution.h"
+
 #include <chrono>
-#include <string>
 #include <fstream>
 
 
