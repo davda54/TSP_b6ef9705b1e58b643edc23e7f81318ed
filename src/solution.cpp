@@ -1,9 +1,10 @@
 #include "solution.h"
+#include "generator.h"
 
 using namespace std;
 
 
-solution::solution(const task& data) : _data(data), _random_engine(random_device()()), _uniform_dist(uniform_real_distribution<float>(0.0f, 1.0f))
+solution::solution(const task& data) : _data(data), _uniform_dist(uniform_real_distribution<float>(0.0f, 1.0f))
 {
 	_cluster_count = _data.cluster_count();
 
@@ -14,7 +15,7 @@ solution::solution(const task& data) : _data(data), _random_engine(random_device
 		_clusters.push_back(i);
 	}
 	_clusters.push_back(start_cluster);
-	shuffle(_clusters.begin(), _clusters.end() - 1, _random_engine);
+	shuffle(_clusters.begin(), _clusters.end() - 1, generator::rnd_int);
 
 
 	_start_city = _data.get_start_city();
@@ -52,7 +53,7 @@ void solution::submit_step()
 
 void solution::simple_swap()
 {
-	_swapped_1 = _random_engine() % (_cluster_count - 1);
+	_swapped_1 = generator::rnd_int() % (_cluster_count - 1);
 	_swapped_2 = (_swapped_1 + 1) % (_cluster_count - 1);
 
 	if(_swapped_1 > _swapped_2)

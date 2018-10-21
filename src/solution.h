@@ -49,7 +49,6 @@ private:
 
 	const task& _data;
 
-	std::mt19937 _random_engine;
 	std::uniform_real_distribution<float> _uniform_dist;
 	int _swapped_1, _swapped_2;
 
