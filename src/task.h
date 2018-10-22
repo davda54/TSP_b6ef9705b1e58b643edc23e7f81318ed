@@ -9,7 +9,7 @@ using city_id_t = int;
 using cluster_id_t = int;
 using cost_t = unsigned short;
 using total_cost_t = int;
-using Solution = std::vector<cluster_id_t>;
+using duration_t = std::chrono::duration<long long, std::ratio<1, 1000000000>>;
 
 const cost_t INVALID_ROUTE = 65535;
 const total_cost_t MAX_TOTAL_COST = INT32_MAX;

@@ -4,7 +4,8 @@
 #include <vector>
 #include "task.h"
 
-const int N = 300;
+
+using Solution = std::vector<cluster_id_t>;
 
 struct city_available_struct
 {
@@ -45,7 +46,7 @@ public:
 	total_cost_t route_cost_approx(const Solution& clusters);
 
 	total_cost_t route_cost_approx(const Solution& clusters, int swapped_index);
-
+	
 private:
 	const task &_data;
 	city_id_t _start_city;

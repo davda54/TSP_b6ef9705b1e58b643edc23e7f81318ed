@@ -2,13 +2,13 @@
 
 #include <iostream>
 #include <unordered_map>
-
-#include <string.h>
 #include <stdio.h>
+#include <string>
 
+#include <algorithm>
+
+#include "annealing.h"
 #include "validator.h"
-#include "generator.h"
-#include "searcher.h"
 
 using namespace std;
 
@@ -40,7 +40,7 @@ void task::load(FILE *input) {
 			if (in_city == 3){
 				auto new_city_index = (city_id_t)_city_names.size();
 				cluster_cities.push_back(new_city_index);
-				_city_names.emplace_back(string(city_name), cluster_id);
+				_city_names.emplace_back(std::string(city_name, 3), cluster_id);
 				city_identifiers_mapping[city_name[0] - 'A'][city_name[1] - 'A'][city_name[2] - 'A'] = new_city_index;
 				in_city = -1;
 			}
@@ -83,7 +83,7 @@ void task::load(FILE *input) {
 		if (day == 0)
 		{
 			for (size_t i = 0; i < _cluster_count; ++i)
-				_graph[i][from][to] = min((cost_t) cost, _graph[i][from][to]);
+				_graph[i][from][to] = min(cost_t(cost), _graph[i][from][to]);
 		}
 		else
 			_graph[day - 1][from][to] = min((cost_t) cost, _graph[day - 1][from][to]);
@@ -132,9 +132,6 @@ void task::load(FILE *input) {
 
 		_cluster_to_cluster_conflict.push_back(move(sub_vector));
 	}
-
-
-	cout << "Input reading done!" << '\n';
 }
 
 void task::run(FILE *input)
@@ -145,15 +142,18 @@ void task::run(FILE *input)
 
 	const auto max_duration = get_available_time();
 
-	generator g(*this);
+	annealing search(*this, max_duration, "stats.out");
+
+	solution solution(*this);
+	search.run(solution);
+
+	cout << "time: " << search.time.count() / 1000000.0 << " ms" << endl;
+	cout << "permutations: " << search.permutations << endl << endl;
+
 	validator v(*this);
-	searcher s(*this, g, v, max_duration, "stats.out", start);
-
-	const Solution& solution = s.run();
-
-	auto route = v.find_route(solution);
+	auto route = v.find_route(solution.clusters());
 	
-	cout << v.route_cost(solution) << endl;
+	cout << v.route_cost(solution.clusters()) << endl;
 	print_path(route, cout);
 }
 
@@ -184,7 +184,7 @@ chrono::duration<int> task::get_available_time() const
 	int clusters = cluster_count();
 	int airports = get_number_of_cities();
 
-	if (clusters <= 20 && airports < 50) return chrono::duration<int>(5);
-	if (clusters <= 100 && airports < 200) return chrono::duration<int>(15);
-	return chrono::duration<int>(30);
+	if (clusters <= 20 && airports < 50) return chrono::duration<int>(3);
+	if (clusters <= 100 && airports < 200) return chrono::duration<int>(5);
+	return chrono::duration<int>(60);
 }
