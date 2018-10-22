@@ -21,6 +21,7 @@ validator::validator(const task& t): _data(t)
 		}
 		_city_available_cache.push_back(move(cities_available));
 		_city_cost_cache.push_back(move(cities_cost));
+		//_path.emplace_back(0,0);
 	}
 }
 
@@ -63,7 +64,7 @@ size_t validator::number_of_conflicts(const Solution& clusters)
 
 	for (size_t i = 1; i < _cluster_count - 1; ++i)
 	{
-        any_available = false;
+		any_available = false;
 		for (auto&& next_city : _city_available_cache[clusters[i]])
 		{
 			next_city.available = false;
@@ -126,16 +127,16 @@ size_t validator::number_of_conflicts(const Solution& clusters, size_t swapped_i
 
 			next_city.last_available = any_available;
 		}
-	}
 
-	if (!was_any_available && any_available) --_last_conflict_count;
-	else if (was_any_available && !any_available) ++_last_conflict_count;
+		if (!was_any_available && any_available) --_last_conflict_count;
+		else if (was_any_available && !any_available) ++_last_conflict_count;
 
-	if (!any_available)
-	{
-		for (auto&& next_city : _city_available_cache[clusters[0]])
+		if (!any_available)
 		{
-			next_city.available = true;
+			for (auto&& next_city : _city_available_cache[clusters[0]])
+			{
+				next_city.available = true;
+			}
 		}
 	}
 

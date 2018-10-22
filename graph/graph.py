@@ -28,7 +28,7 @@ for file in args.file:
         ymax = min([ymax, args.limit])
 
     ax1.plot(arr[:, 0], arr[:, 1] + 1, color='r', linewidth="1", label="curr", alpha=0.25)
-    # ax1.plot(arr[:, 0], arr[:, 2] + 1, color='r', linewidth="2", label="best")
+    ax1.plot(arr[:, 0], arr[:, 2] + 1, color='r', linewidth="2", label="best")
     ax1.semilogy()
     ax1.set_ylim([1, ymax])
     ax1.set_ylabel('energy')

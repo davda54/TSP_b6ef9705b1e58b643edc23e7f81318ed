@@ -51,7 +51,6 @@ private:
 	const task &_data;
 	city_id_t _start_city;
 	size_t _cluster_count;
-	std::vector<std::vector<city_available_struct>> _city_exist_cache;
 
 	std::vector<std::vector<city_available_struct>> _city_available_cache;
 	std::vector<std::vector<city_cost_struct>> _city_cost_cache;
