@@ -1,8 +1,8 @@
 #ifndef TSP_CHALLENGE_KIWI_SOLUTION_H
 #define TSP_CHALLENGE_KIWI_SOLUTION_H
 
-#include <random>
 #include <vector>
+#include <fstream>
 
 #include "task.h"
 
@@ -34,14 +34,17 @@ private:
 	void initialize_cost();
 	void calculate_cost();
 
+	std::ofstream _debug_file;
+
 
 	struct city_cost_struct
 	{
-		city_cost_struct(city_id_t city, total_cost_t cost, int gain) : city(city), cost(cost), gain(gain) {}
+		city_cost_struct(city_id_t city, total_cost_t cost, int gain_in, int gain_out) : city(city), cost(cost), gain_in(gain_in), gain_out(gain_out) {}
 
 		const city_id_t city;
 		total_cost_t cost;
-		int gain;
+		int gain_in;
+		int gain_out;
 	};
 
 	std::vector<cluster_id_t> _clusters;
@@ -49,8 +52,6 @@ private:
 	std::vector<std::vector<city_cost_struct>> _city_cost_cache;
 
 	const task& _data;
-
-	std::uniform_real_distribution<float> _uniform_dist;
 	int _swapped_1, _swapped_2;
 
 	city_id_t _start_city;

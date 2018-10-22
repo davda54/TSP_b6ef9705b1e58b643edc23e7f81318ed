@@ -1,10 +1,12 @@
 #include "solution.h"
 #include "generator.h"
 
+#include <iostream>
+
 using namespace std;
 
 
-solution::solution(const task& data) : _data(data), _uniform_dist(uniform_real_distribution<float>(0.0f, 1.0f))
+solution::solution(const task& data) : _data(data)
 {
 	_cluster_count = _data.cluster_count();
 
@@ -26,7 +28,7 @@ solution::solution(const task& data) : _data(data), _uniform_dist(uniform_real_d
 
 		for (size_t n = 0; n < _data.get_number_of_cities(cluster_id); ++n)
 		{
-			cities_cost.emplace_back(_data.get_nth_city_of_cluster(cluster_id, n), MAX_TOTAL_COST, 0);
+			cities_cost.emplace_back(_data.get_nth_city_of_cluster(cluster_id, n), MAX_TOTAL_COST, 0, 0);
 		}
 		_city_cost_cache.push_back(move(cities_cost));
 	}
@@ -43,7 +45,7 @@ void solution::permute()
 void solution::revert_step()
 {
 	swap();
-	//calculate_cost();
+	calculate_cost();
 }
 
 void solution::submit_step()
@@ -76,9 +78,8 @@ void solution::initialize_cost()
 {
 	for (auto&& next_city : _city_cost_cache[_clusters[0]])
 	{
-		auto cost = _data.get_cost(_start_city, next_city.city, 0);
-		next_city.cost = cost;
-		next_city.gain = 0;
+		next_city.cost = _data.get_cost(_start_city, next_city.city, 0);
+		next_city.gain_out = next_city.gain_in = 0;
 	}
 
 	for (size_t i = 1; i < _cluster_count; ++i)
@@ -86,7 +87,7 @@ void solution::initialize_cost()
 		for (auto&& next_city : _city_cost_cache[_clusters[i]])
 		{
 			next_city.cost = MAX_TOTAL_COST;
-			next_city.gain = 0;
+			next_city.gain_in = next_city.gain_out = 0;
 
 			for (auto&& prev_city : _city_cost_cache[_clusters[i - 1]])
 			{
@@ -109,21 +110,21 @@ void solution::calculate_cost()
 	if (_swapped_1 >= _swapped_2) throw exception("error");
 #endif
 
-	initialize_cost();
-	return;
-
 	if (_swapped_1 == 0 && _swapped_2 == _cluster_count - 2) 
 	{
 		initialize_cost();
 		return;
 	}
 
+	_route_cost += _city_cost_cache[_clusters[_swapped_1]][0].gain_in - _city_cost_cache[_clusters[_swapped_1]][0].gain_out;
+	_route_cost += _city_cost_cache[_clusters[_swapped_2]][0].gain_in - _city_cost_cache[_clusters[_swapped_2]][0].gain_out;
+
 	if (_swapped_1 == 0)
 	{
 		for (auto&& next : _city_cost_cache[_clusters[0]])
 		{
 			next.cost = _data.get_cost(_start_city, next.city, 0);
-			next.gain = 0;
+			next.gain_out = 0;
 		}
 	}
 
@@ -140,8 +141,11 @@ void solution::calculate_cost()
 				tmp_cost = min(tmp_cost, prev.cost + cost);
 			}
 
-			int diff = (tmp_cost - next.cost) - _city_cost_cache[_clusters[i - 1]][0].gain;
-			next.gain += diff;
+			auto& prev = _city_cost_cache[_clusters[i - 1]][0];
+
+			int diff = (tmp_cost - next.cost) + (next.gain_in - prev.gain_out);
+			next.gain_in = prev.gain_out;
+			next.gain_out += tmp_cost - next.cost;
 			_route_cost += diff;
 
 			next.cost = tmp_cost;
@@ -159,8 +163,8 @@ void solution::calculate_cost()
 				next.cost = min(next.cost, prev.cost + cost);
 			}
 
-			next.cost = next.cost;
-			next.gain = _city_cost_cache[_clusters[i - 1]][0].gain;
+			next.gain_in = _city_cost_cache[_clusters[i - 1]][0].gain_out;
+			next.gain_out = next.gain_in;
 		}
 	}
 
@@ -185,7 +189,9 @@ void solution::calculate_cost()
 	}
 
 	auto& next = _city_cost_cache[_clusters[_cluster_count - 1]][0];
-	int diff = (min_total_cost - last_min_total_cost) - _city_cost_cache[_clusters[_cluster_count - 2]][0].gain;
-	next.gain += diff;
+	auto& prev = _city_cost_cache[_clusters[_cluster_count - 2]][0];
+
+	int diff = (min_total_cost - last_min_total_cost) + (next.gain_in - prev.gain_out);
+	next.gain_in = prev.gain_out;
 	_route_cost += diff;
 }

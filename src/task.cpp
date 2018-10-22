@@ -1,10 +1,11 @@
 #include "task.h"
 
-
 #include <iostream>
 #include <unordered_map>
 #include <stdio.h>
 #include <string>
+
+#include <algorithm>
 
 #include "annealing.h"
 #include "validator.h"
@@ -82,7 +83,7 @@ void task::load(FILE *input) {
 		if (day == 0)
 		{
 			for (size_t i = 0; i < _cluster_count; ++i)
-				_graph[i][from][to] = min((cost_t) cost, _graph[i][from][to]);
+				_graph[i][from][to] = min(cost_t(cost), _graph[i][from][to]);
 		}
 		else
 			_graph[day - 1][from][to] = min((cost_t) cost, _graph[day - 1][from][to]);
