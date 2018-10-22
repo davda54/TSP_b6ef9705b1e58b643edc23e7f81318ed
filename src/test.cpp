@@ -1,10 +1,10 @@
 #include <iostream>
 #include <stdio.h>
+#include <cmath>
 
 #include "test.h"
 #include "task.h"
 #include "annealing.h"
-
 
 using namespace std;
 
@@ -31,13 +31,13 @@ void test::check_performance(const char *path)
 
 	double avg_time = 0.0;
 	double var_time = 0.0;
-	double min_time = INFINITY;
-	double max_time = -INFINITY;
+	double min_time = std::numeric_limits<double>::max();
+	double max_time = 0;
 
 	double avg_speed = 0;
 	double var_speed = 0;
-	double min_speed = INFINITY;
-	double max_speed = -INFINITY;
+	double min_speed = std::numeric_limits<double>::max();
+	double max_speed = 0;
 
 
 	for (size_t i = 1; i <= 100; ++i)

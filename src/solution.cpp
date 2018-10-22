@@ -2,6 +2,7 @@
 #include "generator.h"
 
 #include <iostream>
+#include <algorithm>
 
 using namespace std;
 
@@ -18,7 +19,6 @@ solution::solution(const task& data) : _data(data)
 	}
 	_clusters.push_back(start_cluster);
 	shuffle(_clusters.begin(), _clusters.end() - 1, generator::random_engine);
-
 
 	_start_city = _data.get_start_city();
 
