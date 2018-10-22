@@ -35,7 +35,7 @@ private:
 	void calculate_cost();
 
 	std::ofstream _debug_file;
-
+	void print();
 
 	struct city_cost_struct
 	{
