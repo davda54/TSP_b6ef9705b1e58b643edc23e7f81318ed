@@ -1,8 +1,8 @@
 #ifndef TSP_CHALLENGE_KIWI_SOLUTION_H
 #define TSP_CHALLENGE_KIWI_SOLUTION_H
 
-#include <random>
 #include <vector>
+#include <fstream>
 
 #include "task.h"
 
@@ -14,9 +14,11 @@ public:
 	void permute();
 	void revert_step();
 	void submit_step();
-	total_cost_t cost();
+	total_cost_t cost() { return _route_cost; }
 	std::vector<city_id_t> path();
+	void set_clusters(std::vector<cluster_id_t>&& clusters);
 	const std::vector<cluster_id_t>& clusters() const { return _clusters; }
+	std::vector<cluster_id_t> copy_clusters() const { return _clusters; }
 
 private:
 	void simple_swap();
@@ -29,30 +31,31 @@ private:
 		_clusters[_swapped_1] ^= _clusters[_swapped_2];
 	}
 
-	struct city_available_struct
+	void initialize_cost();
+	void calculate_cost();
+
+	std::ofstream _debug_file;
+
+
+	struct city_cost_struct
 	{
-		city_available_struct(city_id_t city, bool available, bool last_available) : city(city), available(available), last_available(last_available) {}
+		city_cost_struct(city_id_t city, total_cost_t cost, int gain_in, int gain_out) : city(city), cost(cost), gain_in(gain_in), gain_out(gain_out) {}
 
 		const city_id_t city;
-		bool available;
-		bool last_available;
+		total_cost_t cost;
+		int gain_in;
+		int gain_out;
 	};
 
 	std::vector<cluster_id_t> _clusters;
 	size_t _cluster_count;
-	std::vector<std::vector<city_available_struct>> _city_available_cache;
+	std::vector<std::vector<city_cost_struct>> _city_cost_cache;
 
 	const task& _data;
-
-	std::mt19937 _random_engine;
-	std::uniform_real_distribution<float> _uniform_dist;
-	size_t _swapped_1;
-	size_t _swapped_2;
+	int _swapped_1, _swapped_2;
 
 	city_id_t _start_city;
-	size_t _last_conflict_count;
-
-	
+	total_cost_t _route_cost;
 };
 
 #endif

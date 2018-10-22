@@ -483,7 +483,7 @@ total_cost_t validator::route_cost_recursive(city_id_t start, const Solution& cl
 	return best_cost;
 }
 
-total_cost_t validator::route_cost_approx(const Solution &clusters) 
+total_cost_t validator::route_cost_approx(const Solution &clusters)
 {
 	for (auto&& next_city : _city_cost_cache[clusters[0]])
 	{
