@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdio.h>
+#include <cmath>
 
 #include "test.h"
 #include "task.h"
@@ -10,10 +11,10 @@ using namespace std;
 
 void test::check_performance()
 {
-	check_performance("resources\\TSALESMAN2-1.in"); // best solutions: 2 114 526, cost: 1407
-	check_performance("resources\\TSALESMAN2-2.in"); // best solutions: 2 688 053, cost: 2147483647
-	check_performance("resources\\TSALESMAN2-3.in"); // best solutions: 4 409 707, cost: 2147483647
-	//check_performance("TSALESMAN2-4.in"); // best solutions: 1 711 945, cost: 2147483647
+	//check_performance("resources\\TSALESMAN2-1.in");
+	//check_performance("resources\\TSALESMAN2-2.in");
+	check_performance("resources\\TSALESMAN2-3.in");
+	check_performance("resources\\TSALESMAN2-4.in");
 }
 
 void test::check_performance(const char *path)
@@ -29,18 +30,19 @@ void test::check_performance(const char *path)
 
 	const auto max_duration = t.get_available_time();
 
-	double avg_time = 0.0;
-	double var_time = 0.0;
-	double min_time = INFINITY;
-	double max_time = -INFINITY;
+	double avg_score = 0.0;
+	double var_score = 0.0;
+	double min_score = std::numeric_limits<double>::max();
+	double max_score = 0.0;
 
-	double avg_speed = 0;
-	double var_speed = 0;
-	double min_speed = INFINITY;
-	double max_speed = -INFINITY;
+	double avg_speed = 0.0;
+	double var_speed = 0.0;
+	double min_speed = std::numeric_limits<double>::max();
+	double max_speed = 0.0;
 
+	const size_t N = 10;
 
-	for (size_t i = 1; i <= 100; ++i)
+	for (size_t i = 1; i <= N; ++i)
 	{
 		cout << "\r" << i;
 
@@ -49,20 +51,20 @@ void test::check_performance(const char *path)
 		s.run(solution);
 
 
+		auto score = solution.cost();
+
+		auto new_avg_score = avg_score + (score - avg_score) / i;
+		var_score += (score - avg_score)*(score - new_avg_score);
+		avg_score = new_avg_score;
+
+		if (score < min_score) min_score = score;
+		if (score > max_score) max_score = score;
+
 		auto time = s.time.count() / 1000000000.0f;
-
-		auto new_avg_time = avg_time + (time - avg_time) / (i + 1);
-		var_time += avg_time*avg_time - new_avg_time*new_avg_time + (time*time - var_time - avg_time*avg_time) / (i + 1);
-		avg_time = new_avg_time;
-
-		if (time < min_time) min_time = time;
-		if (time > max_time) max_time = time;
-
-
 		auto speed = s.permutations / time;
 
-		auto new_avg_speed = avg_speed + (speed - avg_speed) / (i + 1);
-		var_speed += avg_speed * avg_speed - new_avg_speed * new_avg_speed + (speed*speed - var_speed - avg_speed * avg_speed) / (i + 1);
+		auto new_avg_speed = avg_speed + (speed - avg_speed) / i;
+		var_speed += (speed - avg_speed)*(speed - new_avg_speed);
 		avg_speed = new_avg_speed;
 
 		if (speed < min_speed) min_speed = speed;
@@ -70,13 +72,13 @@ void test::check_performance(const char *path)
 	}  
 
 	cout << "\r";
-	cout << "time average: " << avg_time << endl;
-	cout << "time std deviation: " << sqrt(var_time) << endl;
-	cout << "time min: " << min_time << endl;
-	cout << "time max: " << max_time << endl;
+	cout << "score average: " << avg_score << endl;
+	cout << "score std deviation: " << sqrt(var_score / double(N)) << endl;
+	cout << "score min: " << min_score << endl;
+	cout << "score max: " << max_score << endl;
 
 	cout << "speed average: " << avg_speed << endl;
-	cout << "speed std deviation: " << sqrt(var_speed) << endl;
+	cout << "speed std deviation: " << sqrt(var_speed / double(N)) << endl;
 	cout << "speed min: " << min_speed << endl;
 	cout << "speed max: " << max_speed << endl;
 

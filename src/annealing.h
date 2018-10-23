@@ -27,7 +27,7 @@ private:
 	void update_temperature();
 
 	// ANNEALING PARAMS:
-	const temp_t INITIAL_TEMP = 200; //best: 0.3
+	const temp_t INITIAL_TEMP = 4; //best: 0.3
 	const double COOLING_TEMP = 0.99999995; // best: 0.9999995
 	temp_t _t;
 
