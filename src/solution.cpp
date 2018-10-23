@@ -10,17 +10,66 @@ using namespace std;
 solution::solution(const task& data) : _data(data)
 {
 	_cluster_count = _data.cluster_count();
-
+	_start_city = _data.get_start_city();
 	const cluster_id_t start_cluster = _data.get_start_cluster();
-	for (size_t i = 0; i < _cluster_count; ++i)
+
+	/*for (size_t i = 0; i < _cluster_count; ++i)
 	{
 		if (i == start_cluster) continue;
 		_clusters.push_back(i);
 	}
 	_clusters.push_back(start_cluster);
 	shuffle(_clusters.begin(), _clusters.end() - 1, generator::random_engine);
+    */
 
-	_start_city = _data.get_start_city();
+	//
+	// simple greedy path search
+
+	path_struct path(_start_city, start_cluster, _cluster_count);
+	total_cost_t total_cost = 0;
+
+	size_t i = 0;
+	do {
+
+		auto& edges = _data.get_edges(path.head(), i);
+
+		int next_city = -1;
+		cost_t best_cost = INVALID_ROUTE;
+
+		for (auto&& e : edges) {
+
+			if (best_cost < e.second) continue;
+			if (path.length() == _cluster_count - 1){
+				if (_data.get_city_cluster(e.first) != start_cluster) continue;
+			} else {
+				if (path.visited_clusters[_data.get_city_cluster(e.first)]) continue;
+			}
+
+			best_cost = e.second;
+			next_city = e.first;
+		}
+
+		if (next_city == -1){
+			// TODO: tady asi udelat random shuffle
+			cout << "NASRAT, VESMIR TIMDLE PRIMITIVEM NEOCHCIJES!!!!" << endl;
+			throw exception();
+		}
+
+		total_cost += best_cost;
+		path.cities.push_back(next_city);
+		path.visited_clusters[_data.get_city_cluster(next_city)] = true;
+
+		++i;
+
+	} while (_data.get_city_cluster(path.head()) != start_cluster);
+
+	
+	
+	
+	for (size_t i = 1; i < path.length(); ++i)
+	{
+		_clusters.push_back(_data.get_city_cluster(path.cities[i]));
+	}
 
 	for (cluster_id_t cluster_id = 0; cluster_id < _data.cluster_count(); ++cluster_id)
 	{

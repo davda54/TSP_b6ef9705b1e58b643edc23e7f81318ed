@@ -36,6 +36,20 @@ private:
 
 	std::ofstream _debug_file;
 
+	struct path_struct {
+
+		path_struct(city_id_t start, cluster_id_t start_cluster, size_t clusters_count) {
+			cities.push_back(start);
+			visited_clusters.resize(clusters_count);
+			visited_clusters[start_cluster] = true;
+		}
+
+		size_t length() const { return cities.size(); }
+		city_id_t head() const { return cities.back(); }
+
+		std::vector<city_id_t> cities;
+		std::vector<bool> visited_clusters;
+	};
 
 	struct city_cost_struct
 	{
