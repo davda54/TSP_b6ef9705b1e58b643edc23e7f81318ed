@@ -10,10 +10,10 @@ using namespace std;
 
 void test::check_performance()
 {
-	check_performance("resources\\TSALESMAN2-1.in"); // best solutions: 2 114 526, cost: 1407
-	check_performance("resources\\TSALESMAN2-2.in"); // best solutions: 2 688 053, cost: 2147483647
-	check_performance("resources\\TSALESMAN2-3.in"); // best solutions: 4 409 707, cost: 2147483647
-	//check_performance("TSALESMAN2-4.in"); // best solutions: 1 711 945, cost: 2147483647
+	check_performance("../resources/TSALESMAN2-1.in"); // best solutions: 2 114 526, cost: 1407
+	check_performance("../resources/TSALESMAN2-2.in"); // best solutions: 2 688 053, cost: 2147483647
+	check_performance("../resources/TSALESMAN2-3.in"); // best solutions: 4 409 707, cost: 2147483647
+	check_performance("../resources/TSALESMAN2-4.in"); // best solutions: 1 711 945, cost: 2147483647
 }
 
 void test::check_performance(const char *path)
@@ -40,33 +40,36 @@ void test::check_performance(const char *path)
 	double max_speed = 0;
 
 
-	for (size_t i = 1; i <= 100; ++i)
+	for (size_t i = 1; i <= 10; ++i)
 	{
 		cout << "\r" << i;
 
-		annealing s(t, max_duration, "stats.out");
+		auto start = chrono::steady_clock::now();
+
+		//annealing s(t, max_duration, "stats.out");
 		solution solution(t);
-		s.run(solution);
+		//s.run(solution);
 
+		auto time_diff = chrono::steady_clock::now() - start;
 
-		auto time = s.time.count() / 1000000000.0f;
+		auto time = time_diff.count() / 1000000000.0f;
 
-		auto new_avg_time = avg_time + (time - avg_time) / (i + 1);
-		var_time += avg_time*avg_time - new_avg_time*new_avg_time + (time*time - var_time - avg_time*avg_time) / (i + 1);
+		auto new_avg_time = avg_time + (time - avg_time) / (i);
+		var_time += avg_time*avg_time - new_avg_time*new_avg_time + (time*time - var_time - avg_time*avg_time) / (i);
 		avg_time = new_avg_time;
 
 		if (time < min_time) min_time = time;
 		if (time > max_time) max_time = time;
 
 
-		auto speed = s.permutations / time;
+		/*auto speed = s.permutations / time;
 
 		auto new_avg_speed = avg_speed + (speed - avg_speed) / (i + 1);
 		var_speed += avg_speed * avg_speed - new_avg_speed * new_avg_speed + (speed*speed - var_speed - avg_speed * avg_speed) / (i + 1);
 		avg_speed = new_avg_speed;
 
 		if (speed < min_speed) min_speed = speed;
-		if (speed > max_speed) max_speed = speed;
+		if (speed > max_speed) max_speed = speed;*/
 	}  
 
 	cout << "\r";
@@ -75,10 +78,10 @@ void test::check_performance(const char *path)
 	cout << "time min: " << min_time << endl;
 	cout << "time max: " << max_time << endl;
 
-	cout << "speed average: " << avg_speed << endl;
+	/*cout << "speed average: " << avg_speed << endl;
 	cout << "speed std deviation: " << sqrt(var_speed) << endl;
 	cout << "speed min: " << min_speed << endl;
-	cout << "speed max: " << max_speed << endl;
+	cout << "speed max: " << max_speed << endl;*/
 
 	cout << endl << "===========================================" << endl << endl << endl;
 }

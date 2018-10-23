@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <fstream>
+#include <algorithm>
 
 #include "task.h"
 
@@ -11,6 +12,8 @@ class solution
 public:
 	solution(const task& data);
 
+	void shuffle_init();
+	void greedy_search_init();
 	void permute();
 	void revert_step();
 	void submit_step();
@@ -38,17 +41,24 @@ private:
 
 	struct path_struct {
 
-		path_struct(city_id_t start, cluster_id_t start_cluster, size_t clusters_count) {
-			cities.push_back(start);
-			visited_clusters.resize(clusters_count);
-			visited_clusters[start_cluster] = true;
+		path_struct(){}
+
+		path_struct(city_id_t start, cluster_id_t start_cluster, size_t clusters_count)
+		    : length(0), cost(0), head(start) {
+			visited_clusters.resize(clusters_count, -1);
+			visited_clusters[start_cluster] = (short)(clusters_count - 1);
 		}
 
-		size_t length() const { return cities.size(); }
-		city_id_t head() const { return cities.back(); }
+		void add(city_id_t city, cluster_id_t cluster, cost_t edge_cost) {
+			head = city;
+			visited_clusters[cluster] = (short)length++;
+			cost += edge_cost;
+		}
 
-		std::vector<city_id_t> cities;
-		std::vector<bool> visited_clusters;
+		city_id_t head;
+		size_t length;
+		std::vector<short> visited_clusters;
+		total_cost_t cost;
 	};
 
 	struct city_cost_struct
@@ -70,6 +80,9 @@ private:
 
 	city_id_t _start_city;
 	total_cost_t _route_cost;
+
+    const float GRREDY_SEACH_EXP = 2.5f;
+    const int GRREDY_SEACH_KNBRS = 2;
 };
 
 #endif

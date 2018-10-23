@@ -1,5 +1,6 @@
 #include "solution.h"
 #include "generator.h"
+#include "support.h"
 
 #include <iostream>
 #include <algorithm>
@@ -11,65 +12,9 @@ solution::solution(const task& data) : _data(data)
 {
 	_cluster_count = _data.cluster_count();
 	_start_city = _data.get_start_city();
-	const cluster_id_t start_cluster = _data.get_start_cluster();
 
-	/*for (size_t i = 0; i < _cluster_count; ++i)
-	{
-		if (i == start_cluster) continue;
-		_clusters.push_back(i);
-	}
-	_clusters.push_back(start_cluster);
-	shuffle(_clusters.begin(), _clusters.end() - 1, generator::random_engine);
-    */
-
-	//
-	// simple greedy path search
-
-	path_struct path(_start_city, start_cluster, _cluster_count);
-	total_cost_t total_cost = 0;
-
-	size_t i = 0;
-	do {
-
-		auto& edges = _data.get_edges(path.head(), i);
-
-		int next_city = -1;
-		cost_t best_cost = INVALID_ROUTE;
-
-		for (auto&& e : edges) {
-
-			if (best_cost < e.second) continue;
-			if (path.length() == _cluster_count - 1){
-				if (_data.get_city_cluster(e.first) != start_cluster) continue;
-			} else {
-				if (path.visited_clusters[_data.get_city_cluster(e.first)]) continue;
-			}
-
-			best_cost = e.second;
-			next_city = e.first;
-		}
-
-		if (next_city == -1){
-			// TODO: tady asi udelat random shuffle
-			cout << "NASRAT, VESMIR TIMDLE PRIMITIVEM NEOCHCIJES!!!!" << endl;
-			throw exception();
-		}
-
-		total_cost += best_cost;
-		path.cities.push_back(next_city);
-		path.visited_clusters[_data.get_city_cluster(next_city)] = true;
-
-		++i;
-
-	} while (_data.get_city_cluster(path.head()) != start_cluster);
-
-	
-	
-	
-	for (size_t i = 1; i < path.length(); ++i)
-	{
-		_clusters.push_back(_data.get_city_cluster(path.cities[i]));
-	}
+	// shuffle_init();
+	greedy_search_init();
 
 	for (cluster_id_t cluster_id = 0; cluster_id < _data.cluster_count(); ++cluster_id)
 	{
@@ -243,4 +188,86 @@ void solution::calculate_cost()
 	int diff = (min_total_cost - last_min_total_cost) + (next.gain_in - prev.gain_out);
 	next.gain_in = prev.gain_out;
 	_route_cost += diff;
+}
+
+void solution::shuffle_init() {
+
+	const cluster_id_t start_cluster = _data.get_start_cluster();
+	for (size_t i = 0; i < _cluster_count; ++i)
+	{
+		if (i == start_cluster) continue;
+		_clusters.push_back((cluster_id_t) i);
+	}
+	_clusters.push_back(start_cluster);
+
+	//_clusters = { 10, 136, 135, 63, 74, 111, 93, 109, 81, 47, 84, 103, 78, 55, 80, 68, 99, 118, 134, 145, 1, 128, 116, 138, 73, 77, 0, 83, 31, 126, 53, 19, 125, 144, 96, 147, 32, 82, 75, 58, 35, 42, 132, 9, 76, 117, 131, 29, 27, 149, 112, 104, 140, 36, 59, 4, 97, 60, 113, 79, 56, 41, 69, 70, 61, 48, 52, 146, 89, 17, 43, 50, 123, 107, 40, 120, 105, 90, 11, 45, 3, 18, 14, 51, 46, 12, 13, 139, 33, 137, 26, 6, 30, 34, 66, 37, 98, 16, 54, 64, 119, 143, 7, 100, 72, 2, 65, 38, 114, 95, 115, 23, 122, 133, 110, 39, 24, 106, 57, 15, 8, 71, 62, 44, 129, 21, 148, 67, 25, 86, 22, 28, 49, 87, 92, 101, 130, 142, 94, 124, 20, 102, 88, 141, 108, 121, 91, 85, 5, 127 };
+	shuffle(_clusters.begin(), _clusters.end() - 1, generator::random_engine);
+
+}
+
+void solution::greedy_search_init() {
+
+	auto cmp = [&](const path_struct& left, const path_struct& right) {
+
+		if (right.length == left.length) {
+			return right.length > left.length;
+		}
+		auto cost1 = left.cost  / pow(left.length, GRREDY_SEACH_EXP);
+		auto cost2 = right.cost / pow(right.length, GRREDY_SEACH_EXP);
+		return cost1 > cost2;
+	};
+
+    const cluster_id_t start_cluster = _data.get_start_cluster();
+
+	bool no_solution = true;
+	path_struct best_solution;
+	queue<path_struct, decltype(cmp)> q(cmp);
+	q.push (path_struct(_start_city, start_cluster, _cluster_count));
+
+	while (!q.empty() && no_solution) {
+
+		path_struct path = q.pop();
+		const auto& edges = _data.get_edges(path.head, (int) path.length);
+
+		if (path.length == _cluster_count - 1) {
+
+			for (auto&& e : edges) {
+
+				if (_data.get_city_cluster(e.first) != start_cluster) continue;
+				path.add(e.first, _data.get_city_cluster(e.first), e.second);
+
+				if (no_solution) {
+					best_solution = std::move(path);
+					no_solution = false;
+				}
+				/*else if (path.cost < best_solution.cost) {
+					best_solution = std::move(path);
+				}*/
+
+				break;
+			}
+			continue;
+		}
+
+		for (int i = 0, j = 0; j < min((size_t)GRREDY_SEACH_KNBRS, edges.size()) && i < edges.size(); ++i) {
+
+			auto& edge = edges[i];
+
+			if (path.visited_clusters[_data.get_city_cluster(edge.first)] != -1) continue;
+
+			path_struct path_copy = path;
+			path_copy.add(edge.first, _data.get_city_cluster(edge.first), edge.second);
+			q.push(path_copy);
+			++j;
+		}
+	}
+
+	if (no_solution) {
+		shuffle_init();
+		return;
+	}
+
+	for (auto i : sort_indexes(best_solution.visited_clusters)) {
+		_clusters.push_back((cluster_id_t) i);;
+	}
 }

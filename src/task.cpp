@@ -66,6 +66,9 @@ void task::load(FILE *input) {
 		for (size_t i = 0; i < _city_count; ++i) {
 			vector<cost_t> c(_city_count, INVALID_ROUTE);
 			b.push_back(move(c));
+			vector<pair<city_id_t, cost_t>> e;
+			e.reserve(8);
+			d.push_back(move(e));
 		}
 		_graph.push_back(move(b));
 		_edges.push_back(move(d));
@@ -84,12 +87,24 @@ void task::load(FILE *input) {
 		if (day == 0) {
 			for (size_t i = 0; i < _cluster_count; ++i){
 				_graph[i][from][to] = min(cost_t(cost), _graph[i][from][to]);
-				_edges[i][from].emplace_back(to, cost);
+				if (_graph[i][from][to] == cost)
+					_edges[i][from].emplace_back(to, cost);
 			}
 		}
 		else {
 			_graph[day - 1][from][to] = min((cost_t) cost, _graph[day - 1][from][to]);
-			_edges[day - 1][from].emplace_back(to, cost);
+			if (_graph[day - 1][from][to] == cost)
+				_edges[day - 1][from].emplace_back(to, cost);
+		}
+	}
+
+	for (int j = 0; j < _cluster_count; ++j) {
+		for (size_t i = 0; i < _city_count; ++i) {
+			auto& edges = _edges[j][i];
+			sort(edges.begin(), edges.end(),
+				 [](const auto& a, const auto& b) -> bool {
+					 return a.second < b.second;
+				 });
 		}
 	}
 
