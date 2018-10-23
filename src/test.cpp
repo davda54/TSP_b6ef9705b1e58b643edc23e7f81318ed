@@ -69,6 +69,8 @@ void test::check_performance(const char *path)
 
 		if (speed < min_speed) min_speed = speed;
 		if (speed > max_speed) max_speed = speed;
+
+		cout << "\t" << avg_score;
 	}  
 
 	cout << "\r";

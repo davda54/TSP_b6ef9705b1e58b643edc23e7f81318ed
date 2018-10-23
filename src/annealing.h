@@ -26,9 +26,18 @@ private:
 	float acceptance_probability(energy_t current, energy_t next) const;
 	void update_temperature();
 
+	/* resources\TSALESMAN2-3.in, INITIAL_TEMP = 1*150, COOLING_TEMP = 0.9999998
+	 *
+	 * score average: 40115.9
+	 * score std deviation: 704.642
+	 * score min: 39065
+	 * score max: 41388
+	 *
+	 */
+
 	// ANNEALING PARAMS:
-	const temp_t INITIAL_TEMP = 1; //best: 0.3
-	const double COOLING_TEMP = 0.9999997; // best: 0.9999995
+	const temp_t INITIAL_TEMP = 0.8; //best: 0.3
+	const double COOLING_TEMP = 0.9999993; // best: 0.9999995
 	temp_t _t;
 
 	// general:

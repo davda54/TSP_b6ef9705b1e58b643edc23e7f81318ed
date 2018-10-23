@@ -43,7 +43,6 @@ solution::solution(const task& data) : _data(data)
 void solution::permute()
 {
 	clever_swap();
-	//distant_swap();
 	calculate_cost();
 }
 
@@ -101,7 +100,7 @@ void solution::distant_swap()
 
 void solution::clever_swap()
 {
-	for (size_t i = 0; i < 30; ++i)
+	for (size_t i = 0; i < 100; ++i)
 	{
 		_swapped_1 = generator::rnd_int() % (_cluster_count - 1);
 		_swapped_2 = generator::rnd_int() % (_cluster_count - 1);

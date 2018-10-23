@@ -8,12 +8,14 @@ using namespace std;
 
 int main(int argc, char *argv[]) 
 {
+#ifdef _PROFILE
 	test::check_performance();
-
-	//task t;
- //   FILE *file; // = stdin;
- //   file = fopen(argv[1], "r");
- //   if (file == nullptr) perror("Error opening file");
- //   else t.run(file);
- //   fclose(file);
+#else
+	task t;
+    FILE *file; // = stdin;
+    file = fopen(argv[1], "r");
+    if (file == nullptr) perror("Error opening file");
+    else t.run(file);
+    fclose(file);
+#endif
 }
