@@ -42,8 +42,8 @@ solution::solution(const task& data) : _data(data)
 
 void solution::permute()
 {
-	//simple_swap();
-	distant_swap();
+	clever_swap();
+	//distant_swap();
 	calculate_cost();
 }
 
@@ -87,6 +87,53 @@ void solution::distant_swap()
 	if(_swapped_1 == _swapped_2)
 	{
 		_swapped_2 = (_swapped_2 + 1) % (_cluster_count - 1);
+	}\
+
+	if (_swapped_1 > _swapped_2)
+	{
+		_swapped_1 ^= _swapped_2;
+		_swapped_2 ^= _swapped_1;
+		_swapped_1 ^= _swapped_2;
+	}
+
+	swap();
+}
+
+void solution::clever_swap()
+{
+	for (size_t i = 0; i < 30; ++i)
+	{
+		_swapped_1 = generator::rnd_int() % (_cluster_count - 1);
+		_swapped_2 = generator::rnd_int() % (_cluster_count - 1);
+
+		if (_swapped_1 == _swapped_2)
+		{
+			_swapped_2 = (_swapped_2 + 1) % (_cluster_count - 1);
+		}
+
+		const auto a_p = _clusters[(_swapped_1 - 1) % (_cluster_count - 1)];
+		const auto a = _clusters[_swapped_1];
+		const auto a_n = _clusters[_swapped_1 + 1];
+
+		const auto b_p = _clusters[(_swapped_2 - 1) % (_cluster_count - 1)];
+		const auto b = _clusters[_swapped_2];
+		const auto b_n = _clusters[_swapped_2 + 1];
+
+		// a_p---a---a_n  ...  b_p---b---b_n
+		const auto conflicts_before = 
+			  _data.get_conflict(a_p, a, _swapped_1)
+			+ _data.get_conflict(a, a_n, _swapped_1 + 1)
+			+ _data.get_conflict(b_p, b, _swapped_2)
+			+ _data.get_conflict(b, b_n, _swapped_2 + 1);
+
+		// a_p---b---a_n  ...  b_p---a---b_n
+		const auto conflict_after =
+			  _data.get_conflict(a_p, b, _swapped_1)
+			+ _data.get_conflict(b, a_n, _swapped_1 + 1)
+			+ _data.get_conflict(b_p, a, _swapped_2)
+			+ _data.get_conflict(a, b_n, _swapped_2 + 1);
+
+		if (conflict_after <= conflicts_before) break;
 	}
 
 	if (_swapped_1 > _swapped_2)
