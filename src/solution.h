@@ -24,6 +24,7 @@ private:
 	void simple_swap();
 	void distant_swap();
 	void clever_swap();
+	void genius_swap();
 	void swap()
 	{
 		_clusters[_swapped_1] ^= _clusters[_swapped_2];
@@ -33,6 +34,18 @@ private:
 
 	void initialize_cost();
 	void calculate_cost();
+
+	size_t roulette_selector();
+	void recalculate_min_costs();
+	void update_min_cost(int i)
+	{
+		_sum_min_cluster_costs -= _min_cluster_costs[i];
+		int cost = _data.get_cluster_cost(_clusters[(i - 1) % (_cluster_count - 1)], _clusters[i], _clusters[i + 1], i);
+		cost = (int)(log2f(cost + 1.0f) + 0.5f);
+
+		_min_cluster_costs[i] = cost;
+		_sum_min_cluster_costs += cost;
+	}
 
 	std::ofstream _debug_file;
 	void print();
@@ -46,6 +59,9 @@ private:
 		int gain_in;
 		int gain_out;
 	};
+
+	std::vector<cost_t> _min_cluster_costs;
+	int _sum_min_cluster_costs;
 
 	std::vector<cluster_id_t> _clusters;
 	size_t _cluster_count;

@@ -96,41 +96,46 @@ void task::load(FILE *input) {
 	// cluster to cluster route initialization
 
 	_cluster_to_cluster_conflict.reserve(_cluster_count);
+	_cluster_to_cluster_cost.reserve(_cluster_count);
 
 	for (size_t d = 0; d < _cluster_count; ++d)
 	{
-		vector<vector<char>> sub_vector;
-		sub_vector.reserve(_cluster_count);
+		vector<vector<char>> conflict_sub_vector;
+		vector<vector<cost_t>> cost_sub_vector;
+		conflict_sub_vector.reserve(_cluster_count);
+		cost_sub_vector.reserve(_cluster_count);
+
 		for (size_t i = 0; i < _cluster_count; ++i)
 		{
-			vector<char> sub_sub_vector;
-			sub_sub_vector.reserve(_cluster_count);
+			vector<char> conflict_sub_sub_vector;
+			vector<cost_t> cost_sub_sub_vector;
+			conflict_sub_sub_vector.reserve(_cluster_count);
+			cost_sub_sub_vector.reserve(_cluster_count);
 
 			for (size_t j = 0; j < _cluster_count; ++j)
 			{
 				if (i == j)
 				{
-					sub_sub_vector.push_back(0);
+					conflict_sub_sub_vector.push_back(0);
+					cost_sub_sub_vector.push_back(0);
 					continue;
 				}
 
+				cost_t min_cost = INVALID_ROUTE;
 				for(auto&& city_i: get_cluster_cities(i)) for(auto&& city_j: get_cluster_cities(j))
 				{
-					if(get_cost(city_i, city_j, d) != INVALID_ROUTE)
-					{
-						sub_sub_vector.push_back(0);
-						goto end_loop;
-					}
+					min_cost = min(min_cost, get_cost(city_i, city_j, d));
 				}
-				sub_sub_vector.push_back(1);
-
-				end_loop:;
+				conflict_sub_sub_vector.push_back(min_cost == INVALID_ROUTE ? 1 : 0);
+				cost_sub_sub_vector.push_back(min_cost);
 			}
 
-			sub_vector.push_back(move(sub_sub_vector));
+			conflict_sub_vector.push_back(move(conflict_sub_sub_vector));
+			cost_sub_vector.push_back(move(cost_sub_sub_vector));
 		}
 
-		_cluster_to_cluster_conflict.push_back(move(sub_vector));
+		_cluster_to_cluster_conflict.push_back(move(conflict_sub_vector));
+		_cluster_to_cluster_cost.push_back(move(cost_sub_vector));
 	}
 }
 
