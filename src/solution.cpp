@@ -1,4 +1,4 @@
-#include "solution.h"
+﻿#include "solution.h"
 #include "generator.h"
 #include "support.h"
 
@@ -342,11 +342,19 @@ void solution::greedy_search_init() {
 	// prevest do spojaku misto kopirovani pole navstivenych clusteru u kaydy path
 	// hned zamitat dalsi cesty ktery jsou horsi nez current best
 
+	// TODO: měřit čas globálně a inteligentně
+	auto start = chrono::steady_clock::now();
+
+	_length_multiplier_cache.reserve(_cluster_count + 1);
+	for(size_t i = 0; i <= _cluster_count; ++i)
+	{
+		_length_multiplier_cache.push_back(1.0f / pow(i, GREEDY_SEARCH_EXP));
+	}
 
 	auto cmp = [&](const path_struct& left, const path_struct& right) {
 
-		auto cost1 = left.cost / pow(left.length, GRREDY_SEACH_EXP);
-		auto cost2 = right.cost / pow(right.length, GRREDY_SEACH_EXP);
+		auto cost1 = left.cost * _length_multiplier_cache[left.length];
+		auto cost2 = right.cost * _length_multiplier_cache[right.length];
 
 		if (cost1 == cost2) {
 			return right.length > left.length;
@@ -365,10 +373,13 @@ void solution::greedy_search_init() {
 	queue<path_struct, decltype(cmp)> q(cmp);
 	q.push (path_struct(_start_city, start_cluster, _cluster_count));
 
-	while (!q.empty() /*&& no_solution*/) {
+	while (!q.empty() && (chrono::steady_clock::now() - start).count() / 1000000000.0f < 4.0f/*&& no_solution*/) {
 
 		++i;
-		if (i % 10000 == 0) cout << "Population: " << q.size() << ", Best: " << (no_solution ? 0 : best_solution.cost) << ", Solutions: " << solutions << endl;
+
+#ifdef _PRINT
+		if (i % 100000 == 0) cout << "Population: " << q.size() << ", Best: " << (no_solution ? 0 : best_solution.cost) << ", Solutions: " << solutions << endl;
+#endif
 
 		path_struct path = q.pop();
 		const auto& edges = _data.get_edges(path.head, (int) path.length);
@@ -394,7 +405,7 @@ void solution::greedy_search_init() {
 			continue;
 		}
 
-		for (int i = 0, j = 0; j < min((size_t)GRREDY_SEACH_KNBRS, edges.size()) && i < edges.size(); ++i) {
+		for (int i = 0, j = 0; j < min((size_t)GREEDY_SEARCH_KNBRS, edges.size()) && i < edges.size(); ++i) {
 
 			auto& edge = edges[i];
 
@@ -406,6 +417,8 @@ void solution::greedy_search_init() {
 			++j;
 		}
 	}
+
+	solutions_tried = q.size();
 
 	if (no_solution) {
 		shuffle_init();

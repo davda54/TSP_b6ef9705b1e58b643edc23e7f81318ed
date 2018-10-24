@@ -23,6 +23,8 @@ public:
 	const std::vector<cluster_id_t>& clusters() const { return _clusters; }
 	std::vector<cluster_id_t> copy_clusters() const { return _clusters; }
 
+	size_t solutions_tried;
+
 private:
 	void simple_swap();
 	void distant_swap();
@@ -101,8 +103,10 @@ private:
 	// 2.in .. 3, 1.2 ---> 1628   / 2137      // 1579
 	// 3.in .. 3, 2.5 ---> 44219  / 42148	  // 42546
 	// 4.in .. 3, 2.3 ---> 111212 / 109968	  // 110008
-    const float GRREDY_SEACH_EXP = 2.4f;
-    const int GRREDY_SEACH_KNBRS = 3;
+    const float GREEDY_SEARCH_EXP = 2.4f;
+    const int GREEDY_SEARCH_KNBRS = 3;
+
+	std::vector<float> _length_multiplier_cache;
 };
 
 #endif

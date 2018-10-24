@@ -40,15 +40,19 @@ void test::check_performance(const char *path)
 	double min_speed = std::numeric_limits<double>::max();
 	double max_speed = 0.0;
 
-	const size_t N = 10;
+	const size_t N = 5;
 
 	for (size_t i = 1; i <= N; ++i)
 	{
 		cout << "\r" << i;
 
-		annealing s(t, max_duration, "stats.out");
+		auto start = chrono::steady_clock::now();
+
+		//annealing s(t, max_duration, "stats.out");
 		solution solution(t);
-		s.run(solution);
+		//s.run(solution);
+
+		auto time = (chrono::steady_clock::now() - start).count() / 1000000000.0f;
 
 
 		auto score = solution.cost();
@@ -60,8 +64,7 @@ void test::check_performance(const char *path)
 		if (score < min_score) min_score = score;
 		if (score > max_score) max_score = score;
 
-		auto time = s.time.count() / 1000000000.0f;
-		auto speed = s.permutations / time;
+		auto speed = solution.solutions_tried / time;
 
 		auto new_avg_speed = avg_speed + (speed - avg_speed) / i;
 		var_speed += (speed - avg_speed)*(speed - new_avg_speed);
