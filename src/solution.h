@@ -81,8 +81,12 @@ private:
 	city_id_t _start_city;
 	total_cost_t _route_cost;
 
-    const float GRREDY_SEACH_EXP = 2.5f;
-    const int GRREDY_SEACH_KNBRS = 2;
+	// 1.in .. -, 1.0 ---> 1479   / 1396      //
+	// 2.in .. 3, 1.2 ---> 1628   / 2137      // 1579
+	// 3.in .. 3, 2.5 ---> 44219  / 42148	  // 42546
+	// 4.in .. 3, 2.3 ---> 111212 / 109968	  // 110008
+    const float GRREDY_SEACH_EXP = 2.4f;
+    const int GRREDY_SEACH_KNBRS = 3;
 };
 
 #endif

@@ -26,6 +26,8 @@ public:
 
     bool empty() { return _elements.size() == 0; }
 
+    size_t size() { return _elements.size(); }
+
 private:
     std::vector<Type> _elements;
     Compare _compare;

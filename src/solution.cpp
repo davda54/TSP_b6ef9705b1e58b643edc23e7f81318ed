@@ -207,24 +207,38 @@ void solution::shuffle_init() {
 
 void solution::greedy_search_init() {
 
+
+	// TODO:
+	// prevest do spojaku misto kopirovani pole navstivenych clusteru u kaydy path
+	// hned zamitat dalsi cesty ktery jsou horsi nez current best
+
+
 	auto cmp = [&](const path_struct& left, const path_struct& right) {
 
-		if (right.length == left.length) {
+		auto cost1 = left.cost / pow(left.length, GRREDY_SEACH_EXP);
+		auto cost2 = right.cost / pow(right.length, GRREDY_SEACH_EXP);
+
+		if (cost1 == cost2) {
 			return right.length > left.length;
 		}
-		auto cost1 = left.cost  / pow(left.length, GRREDY_SEACH_EXP);
-		auto cost2 = right.cost / pow(right.length, GRREDY_SEACH_EXP);
+
 		return cost1 > cost2;
 	};
 
     const cluster_id_t start_cluster = _data.get_start_cluster();
+
+    size_t solutions = 0;
+	size_t i = 0;
 
 	bool no_solution = true;
 	path_struct best_solution;
 	queue<path_struct, decltype(cmp)> q(cmp);
 	q.push (path_struct(_start_city, start_cluster, _cluster_count));
 
-	while (!q.empty() && no_solution) {
+	while (!q.empty() /*&& no_solution*/) {
+
+		++i;
+		if (i % 10000 == 0) cout << "Population: " << q.size() << ", Best: " << (no_solution ? 0 : best_solution.cost) << ", Solutions: " << solutions << endl;
 
 		path_struct path = q.pop();
 		const auto& edges = _data.get_edges(path.head, (int) path.length);
@@ -240,10 +254,11 @@ void solution::greedy_search_init() {
 					best_solution = std::move(path);
 					no_solution = false;
 				}
-				/*else if (path.cost < best_solution.cost) {
+				else if (path.cost < best_solution.cost) {
 					best_solution = std::move(path);
-				}*/
+				}
 
+				++solutions;
 				break;
 			}
 			continue;
@@ -268,6 +283,6 @@ void solution::greedy_search_init() {
 	}
 
 	for (auto i : sort_indexes(best_solution.visited_clusters)) {
-		_clusters.push_back((cluster_id_t) i);;
+		_clusters.push_back((cluster_id_t) i);
 	}
 }

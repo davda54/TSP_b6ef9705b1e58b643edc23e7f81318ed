@@ -164,14 +164,19 @@ void task::run(FILE *input)
 	annealing search(*this, max_duration, "stats.out");
 
 	solution solution(*this);
-	search.run(solution);
 
-	cout << "time: " << search.time.count() / 1000000.0 << " ms" << endl;
-	cout << "permutations: " << search.permutations << endl << endl;
+//	for (auto&& c : solution.clusters()) {
+//		cout << c << endl;
+//	}
+
+//	search.run(solution);
+
+//	cout << "time: " << search.time.count() / 1000000.0 << " ms" << endl;
+//	cout << "permutations: " << search.permutations << endl << endl;
 
 	validator v(*this);
 	auto route = v.find_route(solution.clusters());
-	
+
 	cout << v.route_cost(solution.clusters()) << endl;
 	print_path(route, cout);
 }
