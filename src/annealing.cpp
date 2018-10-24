@@ -18,7 +18,7 @@ annealing::annealing(const task& data, std::chrono::duration<int> available_time
 void annealing::run(solution& s)
 {
 	_start = chrono::steady_clock::now();
-	_t = INITIAL_TEMP;
+	_t = INITIAL_TEMP*_data.cluster_count();
 
 	energy_t current_energy = s.cost();
 	energy_t best_energy = current_energy;
@@ -36,7 +36,9 @@ void annealing::run(solution& s)
 		{
 			best_energy = new_energy;
 			best_solution = s.copy_clusters();
+#ifdef _PRINT
 			cout << endl << best_energy << endl << "\t" << _t;
+#endif
 		}
 
 		if (new_energy < current_energy || acceptance_probability(current_energy, new_energy) > generator::rnd_float())
@@ -71,8 +73,10 @@ void annealing::update_temperature()
 {
 	_t *= COOLING_TEMP;
 
+#ifdef _PRINT
 	if((chrono::steady_clock::now() - _start).count() % 100000 == 0)
 	{
 		cout << "\r\t" << _t;
 	}
+#endif
 }

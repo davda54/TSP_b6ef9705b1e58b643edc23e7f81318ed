@@ -27,12 +27,30 @@ solution::solution(const task& data) : _data(data)
 		_city_cost_cache.push_back(move(cities_cost));
 	}
 
+	_sum_min_cluster_costs = 0;
+	_min_cluster_costs = vector<cost_t>(_cluster_count - 1, 0);
+
+	for (size_t i = 0; i < _cluster_count - 1; ++i)
+	{
+		int cost = _data.get_cluster_cost(_clusters[(i - 1) % (_cluster_count - 1)], _clusters[i], _clusters[i + 1], i);
+		cost = (int)(log2f(cost + 1) + 0.5f);
+		_min_cluster_costs[i] = cost;
+		_sum_min_cluster_costs += cost;
+	}
+
 	initialize_cost();
+
+#ifdef _PRINT
+	cout << _route_cost << endl;
+#endif
 }
 
 void solution::permute()
 {
-	simple_swap();
+	//if(generator::rnd_float() < 0.5f) clever_swap();
+	//else distant_swap();
+	genius_swap();
+
 	calculate_cost();
 }
 
@@ -44,7 +62,7 @@ void solution::revert_step()
 
 void solution::submit_step()
 {
-
+	recalculate_min_costs();
 }
 
 void solution::set_clusters(std::vector<cluster_id_t>&& clusters)
@@ -59,6 +77,121 @@ void solution::simple_swap()
 	_swapped_2 = (_swapped_1 + 1) % (_cluster_count - 1);
 
 	if(_swapped_1 > _swapped_2)
+	{
+		_swapped_1 ^= _swapped_2;
+		_swapped_2 ^= _swapped_1;
+		_swapped_1 ^= _swapped_2;
+	}
+
+	swap();
+}
+
+void solution::distant_swap()
+{
+	_swapped_1 = generator::rnd_int() % (_cluster_count - 1);
+	_swapped_2 = generator::rnd_int() % (_cluster_count - 1);
+
+	if(_swapped_1 == _swapped_2)
+	{
+		_swapped_2 = (_swapped_2 + 1) % (_cluster_count - 1);
+	}\
+
+	if (_swapped_1 > _swapped_2)
+	{
+		_swapped_1 ^= _swapped_2;
+		_swapped_2 ^= _swapped_1;
+		_swapped_1 ^= _swapped_2;
+	}
+
+	swap();
+}
+
+void solution::clever_swap()
+{
+	for (size_t i = 0; i < 100; ++i)
+	{
+		_swapped_1 = generator::rnd_int() % (_cluster_count - 1);
+		_swapped_2 = generator::rnd_int() % (_cluster_count - 1);
+
+		if (_swapped_1 == _swapped_2)
+		{
+			_swapped_2 = (_swapped_2 + 1) % (_cluster_count - 1);
+		}
+
+		const auto a_p = _clusters[(_swapped_1 - 1) % (_cluster_count - 1)];
+		const auto a = _clusters[_swapped_1];
+		const auto a_n = _clusters[_swapped_1 + 1];
+
+		const auto b_p = _clusters[(_swapped_2 - 1) % (_cluster_count - 1)];
+		const auto b = _clusters[_swapped_2];
+		const auto b_n = _clusters[_swapped_2 + 1];
+
+		// a_p---a---a_n  ...  b_p---b---b_n
+		/*const auto conflicts_before = 
+			  _data.get_conflict(a_p, a, _swapped_1)
+			+ _data.get_conflict(a, a_n, _swapped_1 + 1)
+			+ _data.get_conflict(b_p, b, _swapped_2)
+			+ _data.get_conflict(b, b_n, _swapped_2 + 1);*/
+
+		// a_p---b---a_n  ...  b_p---a---b_n
+		const auto conflict_after =
+			  _data.get_conflict(a_p, b, _swapped_1)
+			+ _data.get_conflict(b, a_n, _swapped_1 + 1)
+			+ _data.get_conflict(b_p, a, _swapped_2)
+			+ _data.get_conflict(a, b_n, _swapped_2 + 1);
+
+		if (conflict_after == 0) break;
+	}
+
+	if (_swapped_1 > _swapped_2)
+	{
+		_swapped_1 ^= _swapped_2;
+		_swapped_2 ^= _swapped_1;
+		_swapped_1 ^= _swapped_2;
+	}
+
+	swap();
+}
+
+void solution::genius_swap()
+{
+	_swapped_1 = roulette_selector();
+
+	for (size_t i = 0; i < 100; ++i)
+	{
+		_swapped_2 = generator::rnd_int() % (_cluster_count - 1);
+
+		if (_swapped_1 == _swapped_2)
+		{
+			_swapped_2 = (_swapped_2 + 1) % (_cluster_count - 1);
+		}
+
+		const auto a_p = _clusters[(_swapped_1 - 1) % (_cluster_count - 1)];
+		const auto a = _clusters[_swapped_1];
+		const auto a_n = _clusters[_swapped_1 + 1];
+
+		const auto b_p = _clusters[(_swapped_2 - 1) % (_cluster_count - 1)];
+		const auto b = _clusters[_swapped_2];
+		const auto b_n = _clusters[_swapped_2 + 1];
+
+		// a_p---a---a_n  ...  b_p---b---b_n
+		/*const auto conflicts_before =
+			_data.get_conflict(a_p, a, _swapped_1)
+			+ _data.get_conflict(a, a_n, _swapped_1 + 1)
+			+ _data.get_conflict(b_p, b, _swapped_2)
+			+ _data.get_conflict(b, b_n, _swapped_2 + 1);*/
+
+		// a_p---b---a_n  ...  b_p---a---b_n
+		const auto conflict_after =
+			_data.get_conflict(a_p, b, _swapped_1)
+			+ _data.get_conflict(b, a_n, _swapped_1 + 1)
+			+ _data.get_conflict(b_p, a, _swapped_2)
+			+ _data.get_conflict(a, b_n, _swapped_2 + 1);
+
+		if (conflict_after == 0) break;
+	}
+
+	if (_swapped_1 > _swapped_2)
 	{
 		_swapped_1 ^= _swapped_2;
 		_swapped_2 ^= _swapped_1;
@@ -104,12 +237,6 @@ void solution::calculate_cost()
 	if (_swapped_1 >= _swapped_2) throw exception("error");
 #endif
 
-	if (_swapped_1 == 0 && _swapped_2 == _cluster_count - 2) 
-	{
-		initialize_cost();
-		return;
-	}
-
 	_route_cost += _city_cost_cache[_clusters[_swapped_1]][0].gain_in - _city_cost_cache[_clusters[_swapped_1]][0].gain_out;
 	_route_cost += _city_cost_cache[_clusters[_swapped_2]][0].gain_in - _city_cost_cache[_clusters[_swapped_2]][0].gain_out;
 
@@ -118,13 +245,13 @@ void solution::calculate_cost()
 		for (auto&& next : _city_cost_cache[_clusters[0]])
 		{
 			next.cost = _data.get_cost(_start_city, next.city, 0);
-			next.gain_out = 0;
+			next.gain_out = next.gain_in = 0;
 		}
 	}
 
-	for (int i = max(size_t(_swapped_1), size_t(1)); i < _cluster_count - 1; ++i)
+	for (int i = max(_swapped_1, 1); i < _cluster_count - 1; ++i)
 	{
-		if (i > _swapped_2 && _city_cost_cache[_clusters[i]].size() == 1)
+		if (i != _swapped_1 && i != _swapped_2 && _city_cost_cache[_clusters[i]].size() == 1)
 		{
 			auto& next = _city_cost_cache[_clusters[i]][0];
 			auto tmp_cost = MAX_TOTAL_COST;
@@ -140,11 +267,14 @@ void solution::calculate_cost()
 			int diff = (tmp_cost - next.cost) + (next.gain_in - prev.gain_out);
 			next.gain_in = prev.gain_out;
 			next.gain_out += tmp_cost - next.cost;
-			_route_cost += diff;
-
 			next.cost = tmp_cost;
 
-			return;
+			_route_cost += diff;
+
+			if (i > _swapped_2) return;
+			
+			i = _swapped_2 - 1;
+			continue;
 		}
 
 		for (auto&& next : _city_cost_cache[_clusters[i]])
@@ -285,4 +415,31 @@ void solution::greedy_search_init() {
 	for (auto i : sort_indexes(best_solution.visited_clusters)) {
 		_clusters.push_back((cluster_id_t) i);
 	}
+}
+
+size_t solution::roulette_selector()
+{
+	const int rnd = (generator::rnd_int() % _sum_min_cluster_costs) + 1;
+	int sum = 0;
+
+	for(size_t i = 0; i < _cluster_count - 1; ++i)
+	{
+		sum += _min_cluster_costs[i];
+		if (sum > rnd) return i;
+	}
+	return _cluster_count - 2;
+}
+
+void solution::recalculate_min_costs()
+{
+	if(_swapped_1 > 0) update_min_cost(_swapped_1 - 1);
+
+	update_min_cost(_swapped_1);
+
+	if (_swapped_1 + 1 != _swapped_2) update_min_cost(_swapped_1 + 1);
+	else if(_swapped_1 + 2 != _swapped_2) update_min_cost(_swapped_2 - 1);
+
+	update_min_cost(_swapped_2);
+	
+	if (_swapped_2 < _cluster_count - 2) update_min_cost(_swapped_2 + 1);
 }

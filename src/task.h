@@ -43,6 +43,16 @@ public:
 		return _cluster_to_cluster_conflict[day][from][to];
 	}
 
+	cost_t get_cluster_cost(cluster_id_t from, cluster_id_t to, size_t day) const
+	{
+		return _cluster_to_cluster_cost[day][from][to];
+	}
+
+	cost_t get_cluster_cost(cluster_id_t prev, cluster_id_t current, cluster_id_t next, size_t first_day) const
+	{
+		return _cluster_to_cluster_cost[prev][current][first_day] + _cluster_to_cluster_cost[current][next][first_day+1];
+	}
+
 	cluster_id_t get_start_cluster() const
 	{
 		return _start_cluster;
@@ -95,6 +105,7 @@ private:
     std::vector<std::vector<std::vector<cost_t>>> _graph;
     std::vector<std::vector<std::vector<std::pair<city_id_t, cost_t>>>> _edges;
 	std::vector<std::vector<std::vector<char>>> _cluster_to_cluster_conflict;
+	std::vector<std::vector<std::vector<cost_t>>> _cluster_to_cluster_cost;
 
     std::vector<std::vector<city_id_t >> _clusters;
     std::vector<std::pair<std::string, cluster_id_t >> _city_names;
