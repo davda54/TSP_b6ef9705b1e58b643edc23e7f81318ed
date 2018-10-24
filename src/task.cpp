@@ -54,20 +54,24 @@ void task::load(FILE *input) {
 		_clusters.push_back(move(cluster_cities));
 	}
 
-	// TODO: udelej poradne -- alloc, memset!
 	_city_count = _city_names.size();
 	_graph.reserve(_cluster_count);
+	_edges.reserve(_cluster_count);
 
-	for (int j = 0; j < _cluster_count; ++j)
-	{
+	for (int j = 0; j < _cluster_count; ++j) {
 		vector<vector<cost_t>> b;
 		b.reserve(_city_count);
-		for (size_t i = 0; i < _city_count; ++i)
-		{
+		vector<vector<pair<city_id_t, cost_t>>> d;
+		d.reserve(_city_count);
+		for (size_t i = 0; i < _city_count; ++i) {
 			vector<cost_t> c(_city_count, INVALID_ROUTE);
 			b.push_back(move(c));
+			vector<pair<city_id_t, cost_t>> e;
+			e.reserve(8);
+			d.push_back(move(e));
 		}
 		_graph.push_back(move(b));
+		_edges.push_back(move(d));
 	}
 
 	char to_city[4];
@@ -76,17 +80,32 @@ void task::load(FILE *input) {
 	int cost;
 
 	while (fscanf(input, "%s %s %i %u\n", from_city, to_city, &day, &cost) == 4) {
+
 		city_id_t from = city_identifiers_mapping[from_city[0] - 'A'][from_city[1] - 'A'][from_city[2] - 'A'];
 		city_id_t to = city_identifiers_mapping[to_city[0] - 'A'][to_city[1] - 'A'][to_city[2] - 'A'];
 
-		// TODO: udelej poradne -- graph je mozna moc velky?
-		if (day == 0)
-		{
-			for (size_t i = 0; i < _cluster_count; ++i)
+		if (day == 0) {
+			for (size_t i = 0; i < _cluster_count; ++i){
 				_graph[i][from][to] = min(cost_t(cost), _graph[i][from][to]);
+				if (_graph[i][from][to] == cost)
+					_edges[i][from].emplace_back(to, cost);
+			}
 		}
-		else
+		else {
 			_graph[day - 1][from][to] = min((cost_t) cost, _graph[day - 1][from][to]);
+			if (_graph[day - 1][from][to] == cost)
+				_edges[day - 1][from].emplace_back(to, cost);
+		}
+	}
+
+	for (int j = 0; j < _cluster_count; ++j) {
+		for (size_t i = 0; i < _city_count; ++i) {
+			auto& edges = _edges[j][i];
+			sort(edges.begin(), edges.end(),
+				 [](const auto& a, const auto& b) -> bool {
+					 return a.second < b.second;
+				 });
+		}
 	}
 
 	_start_city = city_identifiers_mapping[start_identifier[0] - 'A'][start_identifier[1] - 'A'][start_identifier[2] - 'A'];
@@ -150,27 +169,26 @@ void task::run(FILE *input)
 	annealing search(*this, max_duration, "stats.out");
 
 	solution solution(*this);
-	search.run(solution);
 
-	cout << "time: " << search.time.count() / 1000000.0 << " ms" << endl;
-	cout << "permutations: " << search.permutations << endl << endl;
+//	for (auto&& c : solution.clusters()) {
+//		cout << c << endl;
+//	}
+
+//	search.run(solution);
+
+//	cout << "time: " << search.time.count() / 1000000.0 << " ms" << endl;
+//	cout << "permutations: " << search.permutations << endl << endl;
 
 	validator v(*this);
 	auto route = v.find_route(solution.clusters());
-	
+
 	cout << v.route_cost(solution.clusters()) << endl;
 	print_path(route, cout);
 }
 
-vector<tuple<city_id_t, cost_t>> task::get_edges(city_id_t city, int day) const
+const vector<pair<city_id_t, cost_t>>& task::get_edges(city_id_t city, int day) const
 {
-	vector<tuple<city_id_t, cost_t>> edges;
-	auto& city_paths = _graph[day][city];
-	for (int i = 0; i < _cluster_count; ++i)
-	{
-		if (city_paths[i] != INVALID_ROUTE) edges.emplace_back(i, city_paths[i]);
-	}
-	return edges;
+	return _edges[day][city];
 }
 
 void task::print_path(const vector<city_id_t>& path, ostream& output) const

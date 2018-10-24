@@ -22,7 +22,7 @@ public:
 
     void load(FILE *input);
 
-	std::vector<std::tuple<city_id_t, cost_t>> get_edges(city_id_t city, int day) const;
+	const std::vector<std::pair<city_id_t, cost_t>>& get_edges(city_id_t city, int day) const;
 
 	void print_path(const std::vector<city_id_t>& path, std::ostream& output) const;
 
@@ -88,6 +88,11 @@ public:
 		return _city_names[city].first;
 	}
 
+	cluster_id_t get_city_cluster(city_id_t city) const
+	{
+		return _city_names[city].second;
+	}
+
 private:
 
     size_t _cluster_count;
@@ -98,6 +103,7 @@ private:
     // TODO: udelej poradne!
     // first axis day, second city-from, third city-to
     std::vector<std::vector<std::vector<cost_t>>> _graph;
+    std::vector<std::vector<std::vector<std::pair<city_id_t, cost_t>>>> _edges;
 	std::vector<std::vector<std::vector<char>>> _cluster_to_cluster_conflict;
 	std::vector<std::vector<std::vector<cost_t>>> _cluster_to_cluster_cost;
 

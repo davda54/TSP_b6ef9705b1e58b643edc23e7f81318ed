@@ -1,5 +1,6 @@
 #include "solution.h"
 #include "generator.h"
+#include "support.h"
 
 #include <iostream>
 #include <algorithm>
@@ -10,21 +11,10 @@ using namespace std;
 solution::solution(const task& data) : _data(data)
 {
 	_cluster_count = _data.cluster_count();
-
-	const cluster_id_t start_cluster = _data.get_start_cluster();
-	for (size_t i = 0; i < _cluster_count; ++i)
-	{
-		if (i == start_cluster) continue;
-		_clusters.push_back(i);
-	}
-	_clusters.push_back(start_cluster);
-
-	//_clusters = { 10, 136, 135, 63, 74, 111, 93, 109, 81, 47, 84, 103, 78, 55, 80, 68, 99, 118, 134, 145, 1, 128, 70, 96, 30, 77, 138, 73, 61, 0, 116, 31, 131, 6, 57, 83, 122, 144, 60, 19, 106, 29, 126, 75, 82, 4, 59, 147, 32, 41, 76, 117, 9, 42, 35, 27, 16, 140, 104, 36, 56, 133, 58, 53, 22, 69, 39, 132, 113, 64, 65, 95, 114, 148, 97, 89, 17, 123, 107, 33, 46, 40, 45, 14, 90, 3, 11, 79, 50, 43, 119, 120, 146, 105, 51, 85, 12, 13, 88, 143, 98, 100, 112, 72, 115, 66, 124, 2, 149, 7, 71, 23, 8, 54, 130, 129, 102, 18, 21, 62, 44, 20, 121, 125, 48, 24, 87, 15, 101, 37, 38, 52, 26, 110, 28, 137, 34, 25, 141, 86, 5, 139, 91, 92, 142, 67, 94, 49, 108, 127 };
-	//_clusters = { 45, 272, 293, 130, 61, 240, 57, 108, 205, 231, 12, 6, 168, 42, 4, 13, 177, 217, 210, 90, 176, 198, 129, 98, 5, 185, 94, 145, 79, 81, 193, 52, 71, 80, 89, 148, 119, 215, 82, 151, 238, 247, 51, 156, 15, 163, 134, 7, 219, 233, 189, 128, 117, 107, 225, 124, 59, 241, 54, 62, 285, 1, 284, 91, 234, 250, 276, 23, 14, 83, 224, 113, 164, 78, 19, 111, 16, 22, 197, 252, 239, 191, 180, 207, 171, 212, 268, 194, 160, 221, 281, 97, 187, 288, 63, 228, 58, 50, 131, 184, 162, 116, 297, 260, 174, 153, 47, 104, 152, 123, 31, 136, 120, 100, 53, 55, 69, 66, 179, 190, 125, 296, 258, 245, 186, 263, 49, 161, 262, 216, 299, 266, 206, 169, 254, 20, 226, 158, 251, 32, 34, 110, 84, 76, 182, 232, 40, 256, 33, 277, 243, 30, 137, 274, 126, 195, 166, 64, 11, 127, 264, 236, 173, 265, 286, 65, 133, 3, 261, 38, 0, 103, 142, 37, 192, 183, 155, 223, 26, 165, 172, 9, 246, 25, 287, 295, 144, 143, 213, 87, 114, 2, 67, 8, 227, 122, 46, 267, 150, 105, 229, 270, 27, 235, 147, 249, 222, 101, 75, 242, 73, 291, 29, 99, 199, 201, 96, 244, 181, 92, 68, 278, 24, 257, 93, 118, 28, 77, 121, 294, 109, 146, 115, 86, 289, 175, 21, 138, 139, 292, 248, 255, 48, 132, 290, 102, 17, 60, 271, 10, 43, 154, 41, 85, 112, 196, 35, 72, 159, 220, 178, 259, 269, 95, 74, 167, 70, 200, 279, 106, 214, 282, 36, 230, 88, 157, 188, 170, 149, 237, 202, 140, 218, 141, 203, 273, 298, 280, 275, 211, 39, 135, 204, 44, 56, 209, 18, 283, 253, 208 };
-	shuffle(_clusters.begin(), _clusters.end() - 1, generator::random_engine);
-
-
 	_start_city = _data.get_start_city();
+
+	// shuffle_init();
+	greedy_search_init();
 
 	for (cluster_id_t cluster_id = 0; cluster_id < _data.cluster_count(); ++cluster_id)
 	{
@@ -330,6 +320,103 @@ void solution::calculate_cost()
 	_route_cost += diff;
 }
 
+void solution::shuffle_init() {
+
+	const cluster_id_t start_cluster = _data.get_start_cluster();
+	for (size_t i = 0; i < _cluster_count; ++i)
+	{
+		if (i == start_cluster) continue;
+		_clusters.push_back((cluster_id_t) i);
+	}
+	_clusters.push_back(start_cluster);
+
+	//_clusters = { 10, 136, 135, 63, 74, 111, 93, 109, 81, 47, 84, 103, 78, 55, 80, 68, 99, 118, 134, 145, 1, 128, 116, 138, 73, 77, 0, 83, 31, 126, 53, 19, 125, 144, 96, 147, 32, 82, 75, 58, 35, 42, 132, 9, 76, 117, 131, 29, 27, 149, 112, 104, 140, 36, 59, 4, 97, 60, 113, 79, 56, 41, 69, 70, 61, 48, 52, 146, 89, 17, 43, 50, 123, 107, 40, 120, 105, 90, 11, 45, 3, 18, 14, 51, 46, 12, 13, 139, 33, 137, 26, 6, 30, 34, 66, 37, 98, 16, 54, 64, 119, 143, 7, 100, 72, 2, 65, 38, 114, 95, 115, 23, 122, 133, 110, 39, 24, 106, 57, 15, 8, 71, 62, 44, 129, 21, 148, 67, 25, 86, 22, 28, 49, 87, 92, 101, 130, 142, 94, 124, 20, 102, 88, 141, 108, 121, 91, 85, 5, 127 };
+	shuffle(_clusters.begin(), _clusters.end() - 1, generator::random_engine);
+
+}
+
+void solution::greedy_search_init() {
+
+
+	// TODO:
+	// prevest do spojaku misto kopirovani pole navstivenych clusteru u kaydy path
+	// hned zamitat dalsi cesty ktery jsou horsi nez current best
+
+
+	auto cmp = [&](const path_struct& left, const path_struct& right) {
+
+		auto cost1 = left.cost / pow(left.length, GRREDY_SEACH_EXP);
+		auto cost2 = right.cost / pow(right.length, GRREDY_SEACH_EXP);
+
+		if (cost1 == cost2) {
+			return right.length > left.length;
+		}
+
+		return cost1 > cost2;
+	};
+
+    const cluster_id_t start_cluster = _data.get_start_cluster();
+
+    size_t solutions = 0;
+	size_t i = 0;
+
+	bool no_solution = true;
+	path_struct best_solution;
+	queue<path_struct, decltype(cmp)> q(cmp);
+	q.push (path_struct(_start_city, start_cluster, _cluster_count));
+
+	while (!q.empty() /*&& no_solution*/) {
+
+		++i;
+		if (i % 10000 == 0) cout << "Population: " << q.size() << ", Best: " << (no_solution ? 0 : best_solution.cost) << ", Solutions: " << solutions << endl;
+
+		path_struct path = q.pop();
+		const auto& edges = _data.get_edges(path.head, (int) path.length);
+
+		if (path.length == _cluster_count - 1) {
+
+			for (auto&& e : edges) {
+
+				if (_data.get_city_cluster(e.first) != start_cluster) continue;
+				path.add(e.first, _data.get_city_cluster(e.first), e.second);
+
+				if (no_solution) {
+					best_solution = std::move(path);
+					no_solution = false;
+				}
+				else if (path.cost < best_solution.cost) {
+					best_solution = std::move(path);
+				}
+
+				++solutions;
+				break;
+			}
+			continue;
+		}
+
+		for (int i = 0, j = 0; j < min((size_t)GRREDY_SEACH_KNBRS, edges.size()) && i < edges.size(); ++i) {
+
+			auto& edge = edges[i];
+
+			if (path.visited_clusters[_data.get_city_cluster(edge.first)] != -1) continue;
+
+			path_struct path_copy = path;
+			path_copy.add(edge.first, _data.get_city_cluster(edge.first), edge.second);
+			q.push(path_copy);
+			++j;
+		}
+	}
+
+	if (no_solution) {
+		shuffle_init();
+		return;
+	}
+
+	for (auto i : sort_indexes(best_solution.visited_clusters)) {
+		_clusters.push_back((cluster_id_t) i);
+	}
+}
+
 size_t solution::roulette_selector()
 {
 	const int rnd = (generator::rnd_int() % _sum_min_cluster_costs) + 1;
@@ -355,40 +442,4 @@ void solution::recalculate_min_costs()
 	update_min_cost(_swapped_2);
 	
 	if (_swapped_2 < _cluster_count - 2) update_min_cost(_swapped_2 + 1);
-}
-
-void solution::print()
-{
-	_debug_file << "=========================================================================================" << endl;
-	if (_swapped_1 != _swapped_2) _debug_file << "swap: " << _clusters[_swapped_1] << " <-> " << _clusters[_swapped_2] << endl;
-	_debug_file << "route cost: " << _route_cost << endl << endl;
-
-	for(auto i = 0; i < _cluster_count; ++i)
-	{
-		_debug_file << "\t" << _clusters[i];
-	}
-	_debug_file << endl;
-
-	_debug_file << "cost:";
-	for (auto i = 0; i < _cluster_count; ++i)
-	{
-		_debug_file << "\t" << _city_cost_cache[_clusters[i]][0].cost;
-	}
-	_debug_file << endl;
-
-	_debug_file << "in:";
-	for (auto i = 0; i < _cluster_count; ++i)
-	{
-		_debug_file << "\t" << _city_cost_cache[_clusters[i]][0].gain_in;
-	}
-	_debug_file << endl;
-
-	_debug_file << "out:";
-	for (auto i = 0; i < _cluster_count; ++i)
-	{
-		_debug_file << "\t" << _city_cost_cache[_clusters[i]][0].gain_out;
-	}
-	_debug_file << endl;
-
-	_debug_file << "=========================================================================================" << endl << endl;
 }
