@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <string>
 
 using namespace std;
 
@@ -459,8 +460,6 @@ void solution::greedy_search_init() {
 		}
 
 #endif
-	}
-
 	}
 
 
