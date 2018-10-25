@@ -100,6 +100,8 @@ private:
     city_id_t _start_city;
 	cluster_id_t _start_cluster;
 
+	void generate_input(size_t cluster_count, size_t city_count, float average_branching, size_t seed);
+
     // TODO: udelej poradne!
     // first axis day, second city-from, third city-to
     std::vector<std::vector<std::vector<cost_t>>> _graph;
