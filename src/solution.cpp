@@ -420,7 +420,7 @@ void solution::greedy_search_init() {
 		}
 	}
 
-	solutions_tried = q.size();
+	solutions_tried = i;
 
 	if (no_solution) {
 		shuffle_init();
