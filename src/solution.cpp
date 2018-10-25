@@ -505,3 +505,41 @@ void solution::complete_dfs_init_recursive(city_id_t city, total_cost_t cost, in
 
 	visited_clusters[_data.get_city_cluster(city)] = -1;
 }
+
+std::vector<city_id_t> solution::path() {
+
+	vector<city_id_t> path;
+	path.reserve(_cluster_count);
+
+	total_cost_t min_cost = MAX_TOTAL_COST;
+	city_id_t min_city = 0;
+	for (auto&& end : _city_cost_cache[_clusters[_cluster_count - 1]]) {
+		if (end.cost >= min_cost) continue;
+		min_city = end.city;
+		min_cost = end.cost;
+	}
+
+	path.push_back(min_city);
+	city_id_t next_city;
+	for (int i = (int)_cluster_count - 2; i >= 0 ; --i) {
+
+		next_city = min_city;
+		min_cost = MAX_TOTAL_COST;
+
+		for (auto&& prev : _city_cost_cache[_clusters[i]]) {
+			for (auto&& next : _city_cost_cache[_clusters[i + 1]]) {
+				if (next.city != next_city || prev.cost >= min_cost ||
+				    _data.get_cost(prev.city, next_city, i + 1) == INVALID_ROUTE) continue;
+				min_cost = prev.cost;
+				min_city = prev.city;
+			}
+		}
+
+		path.push_back(min_city);
+	}
+
+	path.push_back(_start_city);
+
+	reverse(path.begin(), path.end());
+	return path;
+}

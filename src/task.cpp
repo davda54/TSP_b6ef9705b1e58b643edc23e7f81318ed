@@ -8,7 +8,6 @@
 #include <algorithm>
 
 #include "annealing.h"
-#include "validator.h"
 
 using namespace std;
 
@@ -179,11 +178,8 @@ void task::run(FILE *input)
 //	cout << "time: " << search.time.count() / 1000000.0 << " ms" << endl;
 //	cout << "permutations: " << search.permutations << endl << endl;
 
-	validator v(*this);
-	auto route = v.find_route(solution.clusters());
-
-	cout << v.route_cost(solution.clusters()) << endl;
-	print_path(route, cout);
+	cout << solution.cost() << endl;
+	print_path(solution.path(), cout);
 }
 
 const vector<pair<city_id_t, cost_t>>& task::get_edges(city_id_t city, int day) const
