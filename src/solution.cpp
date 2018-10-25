@@ -377,9 +377,9 @@ void solution::greedy_search_init() {
 
 		++i;
 
-//#ifdef _PRINT
+#ifdef _PRINT
 		if (i % 100000 == 0) cout << "Population: " << q.size() << ", Best: " << (no_solution ? 0 : best_solution.cost) << ", Solutions: " << solutions << endl;
-//#endif
+#endif
 
 		path_struct path = q.pop();
 
@@ -447,9 +447,10 @@ void solution::greedy_search_init() {
 			q.push(path_copy);
 			++used;
 		}
+#endif
+
 	}
 
-#endif
 
 	solutions_tried = i;
 

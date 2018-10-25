@@ -168,7 +168,8 @@ void task::run(FILE *input)
 {
 	const auto start = chrono::steady_clock::now();
 	
-	load(input);
+	//load(input);
+	generate_input(300, 300, 30, 42);
 
 	const auto max_duration = get_available_time();
 
@@ -230,7 +231,7 @@ void task::generate_input(size_t cluster_count, size_t city_count, float average
 		vector<city_id_t> cluster_cities;
 
 		cluster_cities.push_back(i);
-		_city_names.emplace_back("", i);
+		_city_names.emplace_back(to_string(i), i);
 
 		_clusters.push_back(move(cluster_cities));
 	}
@@ -240,7 +241,7 @@ void task::generate_input(size_t cluster_count, size_t city_count, float average
 		auto cluster = rnd() % cluster_count;
 
 		_clusters[cluster].push_back(_city_names.size());
-		_city_names.emplace_back("", _city_names.size());
+		_city_names.emplace_back(to_string(_city_names.size()), _city_names.size());
 	}
 
 	_city_count = _city_names.size();
@@ -269,7 +270,7 @@ void task::generate_input(size_t cluster_count, size_t city_count, float average
 		_edges.push_back(move(d));
 	}
 
-	for(size_t i = 0; i < city_count*average_branching; ++i)
+	for(size_t i = 0; i < cluster_count*city_count*average_branching; ++i)
 	{
 		city_id_t from = rnd() % city_count;
 		city_id_t to = rnd() % city_count;
@@ -279,7 +280,7 @@ void task::generate_input(size_t cluster_count, size_t city_count, float average
 		while(to == from) to = rnd() % city_count;
 		if (cost < 1) cost = 1;
 
-		_graph[day][from][to] = min(cost_t(cost), _graph[i][from][to]);
+		_graph[day][from][to] = min(cost_t(cost), _graph[day][from][to]);
 		if (_graph[day][from][to] == cost) _edges[day][from].emplace_back(to, cost);
 
 	}
