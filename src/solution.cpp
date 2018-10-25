@@ -377,9 +377,9 @@ void solution::greedy_search_init() {
 
 		++i;
 
-#ifdef _PRINT
+//#ifdef _PRINT
 		if (i % 100000 == 0) cout << "Population: " << q.size() << ", Best: " << (no_solution ? 0 : best_solution.cost) << ", Solutions: " << solutions << endl;
-#endif
+//#endif
 
 		path_struct path = q.pop();
 
@@ -408,6 +408,8 @@ void solution::greedy_search_init() {
 			continue;
 		}
 
+#ifdef K_NEIGHBOURS
+
 		for (int i = 0, j = 0; j < min((size_t)GREEDY_SEARCH_KNBRS, edges.size()) && i < edges.size(); ++i) {
 
 			auto& edge = edges[i];
@@ -419,7 +421,35 @@ void solution::greedy_search_init() {
 			q.push(path_copy);
 			++j;
 		}
+
+#endif
+#ifndef K_NEIGHBOURS
+
+		float average = 0.0;
+		cost_t min = INVALID_ROUTE;
+		for (auto e : edges) {
+			average += e.second;
+			if (e.second < min) min = e.second;
+		}
+		average /= edges.size();
+		auto threshold = min + (average - min) * GREEDY_SEARCH_RATIO;
+		int used = 0;
+
+		for (auto&& e : edges) {
+
+			if (e.second > threshold && used >= std::min(edges.size(), (size_t)GREEDY_SEARCH_KNBRS)) break;
+
+			if (path.visited_clusters[_data.get_city_cluster(e.first)] ||
+			 	path.cost + e.second >= best_solution.cost) continue;
+
+			path_struct path_copy = path;
+			path_copy.add(e.first, _data.get_city_cluster(e.first), e.second);
+			q.push(path_copy);
+			++used;
+		}
 	}
+
+#endif
 
 	solutions_tried = i;
 
