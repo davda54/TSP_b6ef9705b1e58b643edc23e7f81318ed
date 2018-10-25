@@ -338,7 +338,6 @@ void solution::shuffle_init() {
 
 void solution::greedy_search_init() {
 
-
 	// TODO:
 	// prevest do spojaku misto kopirovani pole navstivenych clusteru u kaydy path
 	// hned zamitat dalsi cesty ktery jsou horsi nez current best
@@ -374,7 +373,7 @@ void solution::greedy_search_init() {
 	queue<path_struct, decltype(cmp)> q(cmp);
 	q.push (path_struct(_start_city, start_cluster, _cluster_count));
 
-	while (!q.empty() && (chrono::steady_clock::now() - start).count() / 1000000000.0f < 4.0f/*&& no_solution*/) {
+	while (!q.empty() && (chrono::steady_clock::now() - start).count() / 1000000000.0f < 60.0f) {
 
 		++i;
 
@@ -383,7 +382,10 @@ void solution::greedy_search_init() {
 #endif
 
 		path_struct path = q.pop();
-		const auto& edges = _data.get_edges(path.head, (int) path.length);
+
+		if (path.cost >= best_solution.cost) continue;
+
+		const auto& edges = _data.get_edges(path.head->city, (cost_t)path.length);
 
 		if (path.length == _cluster_count - 1) {
 
@@ -410,7 +412,7 @@ void solution::greedy_search_init() {
 
 			auto& edge = edges[i];
 
-			if (path.visited_clusters[_data.get_city_cluster(edge.first)] != -1) continue;
+			if (path.visited_clusters[_data.get_city_cluster(edge.first)] || path.cost + edge.second >= best_solution.cost) continue;
 
 			path_struct path_copy = path;
 			path_copy.add(edge.first, _data.get_city_cluster(edge.first), edge.second);
@@ -419,16 +421,24 @@ void solution::greedy_search_init() {
 		}
 	}
 
-	solutions_tried = q.size();
+	solutions_tried = i;
 
 	if (no_solution) {
 		shuffle_init();
 		return;
 	}
 
-	for (auto i : sort_indexes(best_solution.visited_clusters)) {
-		_clusters.push_back((cluster_id_t) i);
+
+	// MEMORY LEAK! but intented, 'cause who cares in the limited time
+	city_struct* city = best_solution.head;
+
+	while(city->prev != nullptr)
+	{
+		_clusters.push_back(_data.get_city_cluster(city->city));
+		city = city->prev;
 	}
+
+	reverse(_clusters.begin(), _clusters.end());
 }
 
 size_t solution::roulette_selector()

@@ -57,25 +57,34 @@ private:
 
 	std::ofstream _debug_file;
 
+	struct city_struct
+	{
+		city_struct(city_id_t head, city_struct* prev): city(head), prev(prev){	}
+
+		city_id_t city;
+		city_struct* prev;
+	};
+
 	struct path_struct {
 
-		path_struct(){}
+		path_struct(): head(nullptr), length(0), cost(MAX_TOTAL_COST) {}
 
-		path_struct(city_id_t start, cluster_id_t start_cluster, size_t clusters_count)
-		    : length(0), cost(0), head(start) {
-			visited_clusters.resize(clusters_count, -1);
-			visited_clusters[start_cluster] = (short)(clusters_count - 1);
+		path_struct(city_id_t start, cluster_id_t start_cluster, size_t clusters_count): length(0), cost(0) {
+			head = new city_struct(start, nullptr);
+			visited_clusters.resize(clusters_count, false);
+			visited_clusters[start_cluster] = true;
 		}
 
 		void add(city_id_t city, cluster_id_t cluster, cost_t edge_cost) {
-			head = city;
-			visited_clusters[cluster] = (short)length++;
+			head = new city_struct(city, head);
+			visited_clusters[cluster] = true;
 			cost += edge_cost;
+			++length;
 		}
 
-		city_id_t head;
+		city_struct* head;
 		size_t length;
-		std::vector<short> visited_clusters;
+		std::vector<bool> visited_clusters;
 		total_cost_t cost;
 	};
 
