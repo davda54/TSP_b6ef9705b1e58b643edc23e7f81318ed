@@ -11,7 +11,14 @@
 class solution
 {
 public:
-	solution(const task& data);
+
+	enum init_type {
+		COMPLETE_DFS,
+		SHUFFLE,
+		GREEDY_DFS
+	};
+
+	solution(const task& data, std::chrono::duration<int> available_time, init_type init);
 
 	void shuffle_init();
 	void greedy_search_init();
@@ -25,6 +32,7 @@ public:
 	void set_clusters(std::vector<cluster_id_t>&& clusters);
 	const std::vector<cluster_id_t>& clusters() const { return _clusters; }
 	std::vector<cluster_id_t> copy_clusters() const { return _clusters; }
+	void print(std::ostream& output);
 
 	size_t solutions_tried;
 
@@ -119,6 +127,9 @@ private:
     const float GREEDY_SEARCH_RATIO = 0.05f; // 1 -> average, 0 -> min
 
 	std::vector<float> _length_multiplier_cache;
+
+	const std::chrono::duration<int> _available_time;
+	std::chrono::time_point<std::chrono::steady_clock> _start;
 };
 
 #define K_NEIGHBOURS

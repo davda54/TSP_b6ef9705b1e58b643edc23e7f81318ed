@@ -8,14 +8,24 @@
 using namespace std;
 
 
-solution::solution(const task& data) : _data(data)
+solution::solution(const task& data, std::chrono::duration<int> available_time, solution::init_type init)
+	: _data(data), _available_time(available_time)
 {
+	_start = chrono::steady_clock::now();
 	_cluster_count = _data.cluster_count();
 	_start_city = _data.get_start_city();
 
-	// shuffle_init();
-	greedy_search_init();
-	// complete_dfs_init();
+	switch(init) {
+		case COMPLETE_DFS:
+			complete_dfs_init();
+			break;
+		case SHUFFLE:
+			shuffle_init();
+			break;
+		case GREEDY_DFS:
+			greedy_search_init();
+			break;
+	}
 
 	for (cluster_id_t cluster_id = 0; cluster_id < _data.cluster_count(); ++cluster_id)
 	{
@@ -447,9 +457,9 @@ void solution::greedy_search_init() {
 			q.push(path_copy);
 			++used;
 		}
-	}
 
 #endif
+	}
 
 	solutions_tried = i;
 
@@ -582,4 +592,18 @@ std::vector<city_id_t> solution::path() {
 
 	reverse(path.begin(), path.end());
 	return path;
+}
+
+void solution::print(std::ostream &output) {
+
+	output << cost() << endl;
+	std::vector<city_id_t> p = path();
+
+	for (size_t i = 0; i < _cluster_count; i++)
+	{
+		output << _data.get_city_name(p[i]) << " ";
+		output << _data.get_city_name(p[i + 1]) << " ";
+		output << i + 1 << " ";
+		output << _data.get_cost(p[i], p[i + 1], i) << endl;
+	}
 }

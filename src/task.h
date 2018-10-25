@@ -24,9 +24,7 @@ public:
 
 	const std::vector<std::pair<city_id_t, cost_t>>& get_edges(city_id_t city, int day) const;
 
-	void print_path(const std::vector<city_id_t>& path, std::ostream& output) const;
-
-	std::chrono::duration<int> get_available_time() const;
+	std::tuple<std::chrono::duration<int>, std::chrono::duration<int>> get_available_time() const;
 
 	const std::vector<city_id_t> &get_cluster_cities(cluster_id_t cluster) const
 	{
@@ -100,7 +98,6 @@ private:
     city_id_t _start_city;
 	cluster_id_t _start_cluster;
 
-    // TODO: udelej poradne!
     // first axis day, second city-from, third city-to
     std::vector<std::vector<std::vector<cost_t>>> _graph;
     std::vector<std::vector<std::vector<std::pair<city_id_t, cost_t>>>> _edges;

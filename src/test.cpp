@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <cmath>
+#include <tuple>
 
 #include "test.h"
 #include "task.h"
@@ -28,7 +29,9 @@ void test::check_performance(const char *path)
 	task t;
 	t.load(file);
 
-	const auto max_duration = t.get_available_time();
+	chrono::duration<int> annealing_duration;
+	chrono::duration<int> initialization_duration;
+	tie(annealing_duration, initialization_duration) = t.get_available_time();
 
 	double avg_score = 0.0;
 	double var_score = 0.0;
@@ -49,7 +52,7 @@ void test::check_performance(const char *path)
 		auto start = chrono::steady_clock::now();
 
 		//annealing s(t, max_duration, "stats.out");
-		solution solution(t);
+		solution solution(t, annealing_duration, solution::init_type::GREEDY_DFS);
 		//s.run(solution);
 
 		auto time = (chrono::steady_clock::now() - start).count() / 1000000000.0f;

@@ -6,6 +6,7 @@
 #include <string>
 
 #include <algorithm>
+#include <tuple>
 
 #include "annealing.h"
 
@@ -163,23 +164,25 @@ void task::run(FILE *input)
 	
 	load(input);
 
-	const auto max_duration = get_available_time();
+	chrono::duration<int> annealing_duration;
+	chrono::duration<int> initialization_duration;
+	tie(annealing_duration, initialization_duration) = get_available_time();
 
-	annealing search(*this, max_duration, "stats.out");
+	if (cluster_count() <= 10 && get_number_of_cities() < 20){
+		initialization_duration += annealing_duration;
+		solution s(*this, initialization_duration, solution::init_type::COMPLETE_DFS);
+		s.print(cout);
+	}
+	else {
 
-	solution solution(*this);
+		annealing search(*this, annealing_duration, "stats.out");
+		solution s(*this, initialization_duration, solution::init_type::GREEDY_DFS);
+		search.run(s);
+		s.print(cout);
 
-//	for (auto&& c : solution.clusters()) {
-//		cout << c << endl;
-//	}
-
-//	search.run(solution);
-
-//	cout << "time: " << search.time.count() / 1000000.0 << " ms" << endl;
-//	cout << "permutations: " << search.permutations << endl << endl;
-
-	cout << solution.cost() << endl;
-	print_path(solution.path(), cout);
+		//	cout << "time: " << search.time.count() / 1000000.0 << " ms" << endl;
+		//	cout << "permutations: " << search.permutations << endl << endl;
+	}
 }
 
 const vector<pair<city_id_t, cost_t>>& task::get_edges(city_id_t city, int day) const
@@ -187,23 +190,12 @@ const vector<pair<city_id_t, cost_t>>& task::get_edges(city_id_t city, int day) 
 	return _edges[day][city];
 }
 
-void task::print_path(const vector<city_id_t>& path, ostream& output) const
-{
-	for (size_t i = 0; i < _cluster_count; i++)
-	{
-		output << get_city_name(path[i]) << " ";
-		output << get_city_name(path[i + 1]) << " ";
-		output << i + 1 << " ";
-		output << get_cost(path[i], path[i + 1], i) << endl;
-	}
-}
-
-chrono::duration<int> task::get_available_time() const
+std::tuple<chrono::duration<int>, chrono::duration<int>> task::get_available_time() const
 {
 	int clusters = cluster_count();
 	int airports = get_number_of_cities();
 
-	if (clusters <= 20 && airports < 50) return chrono::duration<int>(3);
-	if (clusters <= 100 && airports < 200) return chrono::duration<int>(5);
-	return chrono::duration<int>(15);
+	if (clusters <= 20 && airports < 50) return {chrono::duration<int>(2), chrono::duration<int>(1)};
+	if (clusters <= 100 && airports < 200) return {chrono::duration<int>(3), chrono::duration<int>(2)};
+	return {chrono::duration<int>(11), chrono::duration<int>(4)};
 }
