@@ -4,6 +4,7 @@
 #include <vector>
 #include <fstream>
 #include <algorithm>
+#include <cmath>
 
 #include "task.h"
 
@@ -14,6 +15,8 @@ public:
 
 	void shuffle_init();
 	void greedy_search_init();
+	void complete_dfs_init();
+	void complete_dfs_init_recursive(city_id_t city, total_cost_t cost, int length, std::vector<int>& visited_clusters, total_cost_t& best_cost, std::vector<int>& best_path);
 	void permute();
 	void revert_step();
 	void submit_step();

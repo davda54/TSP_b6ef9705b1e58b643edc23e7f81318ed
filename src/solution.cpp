@@ -15,6 +15,7 @@ solution::solution(const task& data) : _data(data)
 
 	// shuffle_init();
 	greedy_search_init();
+	// complete_dfs_init();
 
 	for (cluster_id_t cluster_id = 0; cluster_id < _data.cluster_count(); ++cluster_id)
 	{
@@ -465,4 +466,52 @@ void solution::recalculate_min_costs()
 	update_min_cost(_swapped_2);
 	
 	if (_swapped_2 < _cluster_count - 2) update_min_cost(_swapped_2 + 1);
+}
+
+void solution::complete_dfs_init() {
+
+	vector<int> visited_clusters(_cluster_count, -1);
+	total_cost_t best_cost = MAX_TOTAL_COST;
+	vector<int> best_path;
+
+	visited_clusters[_data.get_city_cluster(_start_city)] = (int)_cluster_count - 1;
+	for (auto&& e : _data.get_edges(_start_city, 0)) {
+		if (visited_clusters[_data.get_city_cluster(e.first)] != -1) continue;
+		complete_dfs_init_recursive(e.first, e.second, 0, visited_clusters, best_cost, best_path);
+	}
+
+	for (auto i : sort_indexes(best_path)) {
+		_clusters.push_back((cluster_id_t) i);
+	}
+}
+
+void solution::complete_dfs_init_recursive(city_id_t city, total_cost_t cost, int length, vector<int>& visited_clusters, total_cost_t& best_cost, vector<int>& best_path) {
+
+	if (cost > best_cost) return;
+
+	visited_clusters[_data.get_city_cluster(city)] = length++;
+	auto& edges = _data.get_edges(city, length);
+
+	if (length == _cluster_count - 1) {
+
+		cost_t min = INVALID_ROUTE;
+		for (auto&& e : edges) {
+			if (_data.get_city_cluster(e.first) != _data.get_city_cluster(_start_city) || e.second > min) continue;
+			min = e.second;
+		}
+
+		if (min != INVALID_ROUTE && best_cost > cost + min) {
+			best_cost = cost + min;
+			best_path = visited_clusters;
+		}
+
+	} else {
+
+		for (auto&& e : edges) {
+			if (visited_clusters[_data.get_city_cluster(e.first)] != -1) continue;
+			complete_dfs_init_recursive(e.first, cost + e.second, length, visited_clusters, best_cost, best_path);
+		}
+	}
+
+	visited_clusters[_data.get_city_cluster(city)] = -1;
 }
