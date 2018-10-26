@@ -63,9 +63,9 @@ solution::solution(const task& data, std::chrono::duration<int> available_time, 
 
 void solution::permute()
 {
-	//if(generator::rnd_float() < 0.5f) clever_swap();
-	//else distant_swap();
-	genius_swap();
+	//distant_swap();
+	clever_swap();
+	//genius_swap();
 
 	calculate_cost();
 }
@@ -78,7 +78,7 @@ void solution::revert_step()
 
 void solution::submit_step()
 {
-	recalculate_min_costs();
+	//recalculate_min_costs();
 }
 
 void solution::set_clusters(std::vector<cluster_id_t>&& clusters)
@@ -389,7 +389,7 @@ void solution::greedy_search_init() {
 		++i;
 
 //#ifdef _PRINT
-		if (i % 10000 == 0) cout << "Population: " << q.size() << ", Best: " << (no_solution ? 0 : best_solution.cost) << ", Solutions: " << solutions << endl;
+		if (i % 100000 == 0) cout << "Population: " << q.size() << ", Best: " << (no_solution ? 0 : best_solution.cost) << ", Solutions: " << solutions << endl;
 //#endif
 			
 		path_struct path = q.pop();

@@ -9,6 +9,7 @@
 #include <tuple>
 
 #include "annealing.h"
+#include "config.h"
 
 using namespace std;
 
@@ -182,7 +183,7 @@ void task::run(FILE *input)
 	else 
 	{
 		annealing search(*this, available_time, "stats.out", start);
-		solution s(*this, chrono::duration<int>(1), solution::init_type::GREEDY_DFS);
+		solution s(*this, chrono::duration<int>(config::GREEDY_SEARCH_TIME), solution::init_type::GREEDY_DFS);
 		search.run(s);
 		s.print(cout);
 
