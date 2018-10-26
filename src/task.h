@@ -24,7 +24,7 @@ public:
 
 	const std::vector<std::pair<city_id_t, cost_t>>& get_edges(city_id_t city, int day) const;
 
-	std::tuple<std::chrono::duration<int>, std::chrono::duration<int>> get_available_time() const;
+	std::chrono::duration<int> get_available_time() const;
 
 	const std::vector<city_id_t> &get_cluster_cities(cluster_id_t cluster) const
 	{

@@ -20,7 +20,7 @@ void task::load(FILE *input)
 	fscanf(input, "%u %s\n", &cluster_count, start_identifier);
 	_cluster_count = cluster_count;
 
-	city_id_t city_identifiers_mapping[75][75][75];
+	city_id_t* city_identifiers_mapping = new city_id_t[75*75*75];
 
 	char cluster_name[256];
     char city_name[4];
@@ -41,7 +41,7 @@ void task::load(FILE *input)
 				auto new_city_index = (city_id_t)_city_names.size();
 				cluster_cities.push_back(new_city_index);
 				_city_names.emplace_back(std::string(city_name, 3), cluster_id);
-				city_identifiers_mapping[city_name[0] - '0'][city_name[1] - '0'][city_name[2] - '0'] = new_city_index;
+				city_identifiers_mapping[(city_name[0] - '0')*75*75 + (city_name[1] - '0')*75 + city_name[2] - '0'] = new_city_index;
 				in_city = -1;
 			}
 
@@ -83,8 +83,8 @@ void task::load(FILE *input)
 
 	while (fscanf(input, "%s %s %i %u\n", from_city, to_city, &day, &cost) == 4)
 	{
-		city_id_t from = city_identifiers_mapping[from_city[0] - '0'][from_city[1] - '0'][from_city[2] - '0'];
-		city_id_t to = city_identifiers_mapping[to_city[0] - '0'][to_city[1] - '0'][to_city[2] - '0'];
+		city_id_t from = city_identifiers_mapping[(from_city[0] - '0') * 75 * 75 + (from_city[1] - '0') * 75 + from_city[2] - '0'];
+		city_id_t to = city_identifiers_mapping[(to_city[0] - '0') * 75 * 75 + (to_city[1] - '0') * 75 + to_city[2] - '0'];
 
 		if (day == 0)
 		{
@@ -115,7 +115,7 @@ void task::load(FILE *input)
 		}
 	}
 
-	_start_city = city_identifiers_mapping[start_identifier[0] - 'A'][start_identifier[1] - 'A'][start_identifier[2] - 'A'];
+	_start_city = city_identifiers_mapping[(start_identifier[0] - '0') * 75 * 75 + (start_identifier[1] - '0') * 75 + start_identifier[2] - '0'];
 	_start_cluster = _city_names[_start_city].second;
 
 
@@ -172,19 +172,17 @@ void task::run(FILE *input)
 	load(input);
 	//generate_input(300, 300, 30, 42);
 
-	chrono::duration<int> annealing_duration;
-	chrono::duration<int> initialization_duration;
-	tie(annealing_duration, initialization_duration) = get_available_time();
+	auto available_time = get_available_time();
 
-	if (cluster_count() <= 10 && get_number_of_cities() < 20){
-		initialization_duration += annealing_duration;
-		solution s(*this, initialization_duration, solution::init_type::COMPLETE_DFS);
+	if (cluster_count() <= 10 && get_number_of_cities() < 20)
+	{
+		solution s(*this, available_time, solution::init_type::COMPLETE_DFS);
 		s.print(cout);
 	}
-	else {
-
-		annealing search(*this, annealing_duration, "stats.out");
-		solution s(*this, initialization_duration, solution::init_type::GREEDY_DFS);
+	else 
+	{
+		annealing search(*this, available_time, "stats.out", start);
+		solution s(*this, chrono::duration<int>(1), solution::init_type::GREEDY_DFS);
 		search.run(s);
 		s.print(cout);
 
@@ -198,14 +196,14 @@ const vector<pair<city_id_t, cost_t>>& task::get_edges(city_id_t city, int day) 
 	return _edges[day][city];
 }
 
-std::tuple<chrono::duration<int>, chrono::duration<int>> task::get_available_time() const
+chrono::duration<int> task::get_available_time() const
 {
 	int clusters = cluster_count();
 	int airports = get_number_of_cities();
 
-	if (clusters <= 20 && airports < 50) return {chrono::duration<int>(15), chrono::duration<int>(1)};
-	if (clusters <= 100 && airports < 200) return {chrono::duration<int>(15), chrono::duration<int>(2)};
-	return {chrono::duration<int>(11), chrono::duration<int>(15)};
+	if (clusters <= 20 && airports < 50) return chrono::duration<int>(3);
+	if (clusters <= 100 && airports < 200) return chrono::duration<int>(5);
+	return chrono::duration<int>(15);
 }
 
 void task::generate_input(size_t cluster_count, size_t city_count, float average_branching, size_t seed)
