@@ -67,30 +67,41 @@ private:
 
 	struct city_struct
 	{
-		city_struct(city_id_t head, city_struct* prev): city(head), prev(prev){	}
+		// TODO: DANGER, REMOVE!!!!
+		//city_struct(city_id_t head, city_struct* prev): city(head), prev(prev){	}
+		city_struct(city_id_t head, size_t prev): city(head), prev(prev){	}
 
 		city_id_t city;
-		city_struct* prev;
+		// city_struct* prev;
+		// TODO: DANGER, REMOVE!!!!
+		size_t prev;
 	};
 
 	struct path_struct {
 
-		path_struct(): head(nullptr), length(0), cost(MAX_TOTAL_COST) {}
+		path_struct(): head(0), length(0), cost(MAX_TOTAL_COST) {}
 
-		path_struct(city_id_t start, cluster_id_t start_cluster, size_t clusters_count): length(0), cost(0) {
-			head = new city_struct(start, nullptr);
+		path_struct(city_id_t start, cluster_id_t start_cluster, size_t clusters_count, std::vector<city_struct>& succesor_buffer): length(0), cost(0), head(0) {
+			//head = new city_struct(start, nullptr);
+			// TODO: DANGER, REMOVE!!!!
+			succesor_buffer.emplace_back(start, 0);
 			visited_clusters.resize(clusters_count, false);
 			visited_clusters[start_cluster] = true;
 		}
 
-		void add(city_id_t city, cluster_id_t cluster, cost_t edge_cost) {
-			head = new city_struct(city, head);
+		void add(city_id_t city, cluster_id_t cluster, cost_t edge_cost, std::vector<city_struct>& succesor_buffer) {
+			//head = new city_struct(city, head);
+			// TODO: DANGER, REMOVE!!!!
+			succesor_buffer.emplace_back(city, head);
+			head = succesor_buffer.size() - 1;
 			visited_clusters[cluster] = true;
 			cost += edge_cost;
 			++length;
 		}
 
-		city_struct* head;
+		//city_struct* head;
+		// TODO: DANGER, REMOVE!!!!
+		size_t head;
 		size_t length;
 		std::vector<bool> visited_clusters;
 		total_cost_t cost;
@@ -119,17 +130,13 @@ private:
 	city_id_t _start_city;
 	total_cost_t _route_cost;
 
-	// 2.in .. 3, 1.2 ---> 1628   / 2137      // 1562,   1.5, 0.05
-	// 3.in .. 3, 2.5 ---> 44219  / 42148	  // 41061,  3.8, 0.05
-	// 4.in .. 3, 2.3 ---> 111212 / 109968	  // 110008,
-    const float GREEDY_SEARCH_EXP = 2.8f;
-    const int GREEDY_SEARCH_KNBRS = 2;
-    const float GREEDY_SEARCH_RATIO = 0.05f; // 1 -> average, 0 -> min
-
 	std::vector<float> _length_multiplier_cache;
 
 	const std::chrono::duration<int> _available_time;
 	std::chrono::time_point<std::chrono::steady_clock> _start;
+
+	// TODO: DANGER, REMOVE!!!!
+	std::vector<city_struct> _previous_city_buffer;
 };
 
 #define K_NEIGHBOURS

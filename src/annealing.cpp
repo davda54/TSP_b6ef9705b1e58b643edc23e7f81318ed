@@ -2,6 +2,7 @@
 
 #include "solution.h"
 #include "generator.h"
+#include "config.h"
 
 #include <iostream>
 #include <cmath>
@@ -18,7 +19,7 @@ annealing::annealing(const task& data, std::chrono::duration<int> available_time
 void annealing::run(solution& s)
 {
 	_start = chrono::steady_clock::now();
-	_t = INITIAL_TEMP*_data.cluster_count();
+	_t = config::INITIAL_TEMP * _data.cluster_count();
 
 	energy_t current_energy = s.cost();
 	energy_t best_energy = current_energy;
@@ -71,7 +72,7 @@ float annealing::acceptance_probability(energy_t current, energy_t next) const
 
 void annealing::update_temperature()
 {
-	_t *= COOLING_TEMP;
+	_t *= config::COOLING_TEMP;
 
 #ifdef _PRINT
 	if((chrono::steady_clock::now() - _start).count() % 100000 == 0)

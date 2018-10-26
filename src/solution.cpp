@@ -1,6 +1,7 @@
 ﻿#include "solution.h"
 #include "generator.h"
 #include "support.h"
+#include "config.h"
 
 #include <iostream>
 #include <algorithm>
@@ -11,6 +12,9 @@ using namespace std;
 solution::solution(const task& data, std::chrono::duration<int> available_time, solution::init_type init)
 	: _data(data), _available_time(available_time)
 {
+    // TODO: DANGER, REMOVE!!!!
+    _previous_city_buffer.reserve(5000000);
+
 	_start = chrono::steady_clock::now();
 	_cluster_count = _data.cluster_count();
 	_start_city = _data.get_start_city();
@@ -348,17 +352,12 @@ void solution::shuffle_init() {
 
 void solution::greedy_search_init() {
 
-	// TODO:
-	// prevest do spojaku misto kopirovani pole navstivenych clusteru u kaydy path
-	// hned zamitat dalsi cesty ktery jsou horsi nez current best
-
-	// TODO: měřit čas globálně a inteligentně
-	auto start = chrono::steady_clock::now();
+    auto start = chrono::steady_clock::now();
 
 	_length_multiplier_cache.reserve(_cluster_count + 1);
 	for(size_t i = 0; i <= _cluster_count; ++i)
 	{
-		_length_multiplier_cache.push_back(1.0f / pow(i, GREEDY_SEARCH_EXP));
+		_length_multiplier_cache.push_back(1.0f / pow(i, config::GREEDY_SEARCH_EXP));
 	}
 
 	auto cmp = [&](const path_struct& left, const path_struct& right) {
@@ -381,28 +380,31 @@ void solution::greedy_search_init() {
 	bool no_solution = true;
 	path_struct best_solution;
 	queue<path_struct, decltype(cmp)> q(cmp);
-	q.push (path_struct(_start_city, start_cluster, _cluster_count));
+	// TODO: DANGER, REMOVE!!!!
+	q.push(path_struct(_start_city, start_cluster, _cluster_count, _previous_city_buffer));
 
 	while (!q.empty() && (chrono::steady_clock::now() - start).count() / 1000000000.0f < 60.0f) {
 
 		++i;
 
-#ifdef _PRINT
+//#ifdef _PRINT
 		if (i % 100000 == 0) cout << "Population: " << q.size() << ", Best: " << (no_solution ? 0 : best_solution.cost) << ", Solutions: " << solutions << endl;
-#endif
+//#endif
 
 		path_struct path = q.pop();
 
 		if (path.cost >= best_solution.cost) continue;
 
-		const auto& edges = _data.get_edges(path.head->city, (cost_t)path.length);
+		// const auto& edges = _data.get_edges(path.head->city, (cost_t)path.length);
+		// TODO: DANGER, REMOVE!!!!
+		const auto& edges = _data.get_edges(_previous_city_buffer[path.head].city, (cost_t)path.length);
 
 		if (path.length == _cluster_count - 1) {
 
 			for (auto&& e : edges) {
 
 				if (_data.get_city_cluster(e.first) != start_cluster) continue;
-				path.add(e.first, _data.get_city_cluster(e.first), e.second);
+				path.add(e.first, _data.get_city_cluster(e.first), e.second, _previous_city_buffer);
 
 				if (no_solution) {
 					best_solution = std::move(path);
@@ -419,22 +421,19 @@ void solution::greedy_search_init() {
 		}
 
 #ifdef K_NEIGHBOURS
-
-		for (int i = 0, j = 0; j < min((size_t)GREEDY_SEARCH_KNBRS, edges.size()) && i < edges.size(); ++i) {
+		for (int i = 0, j = 0; j < min((size_t) config::GREEDY_SEARCH_KNBRS, edges.size()) && i < edges.size(); ++i) {
 
 			auto& edge = edges[i];
 
 			if (path.visited_clusters[_data.get_city_cluster(edge.first)] || path.cost + edge.second >= best_solution.cost) continue;
 
 			path_struct path_copy = path;
-			path_copy.add(edge.first, _data.get_city_cluster(edge.first), edge.second);
+			path_copy.add(edge.first, _data.get_city_cluster(edge.first), edge.second, _previous_city_buffer);
 			q.push(path_copy);
 			++j;
 		}
-
 #endif
 #ifndef K_NEIGHBOURS
-
 		float average = 0.0;
 		cost_t min = INVALID_ROUTE;
 		for (auto e : edges) {
@@ -461,9 +460,6 @@ void solution::greedy_search_init() {
 #endif
 	}
 
-	}
-
-
 	solutions_tried = i;
 
 	if (no_solution) {
@@ -473,13 +469,22 @@ void solution::greedy_search_init() {
 
 
 	// MEMORY LEAK! but intented, 'cause who cares in the limited time
-	city_struct* city = best_solution.head;
+//	city_struct* city = best_solution.head;
+//
+//	while(city->prev != nullptr)
+//	{
+//		_clusters.push_back(_data.get_city_cluster(city->city));
+//		city = city->prev;
+//	}
 
-	while(city->prev != nullptr)
+	// TODO: DANGER, REMOVE!!!!
+	city_struct city = _previous_city_buffer[best_solution.head];
+	while (city.city != _start_city)
 	{
-		_clusters.push_back(_data.get_city_cluster(city->city));
-		city = city->prev;
+		_clusters.push_back(_data.get_city_cluster(city.city));
+		city = _previous_city_buffer[city.prev];
 	}
+
 
 	reverse(_clusters.begin(), _clusters.end());
 }

@@ -169,8 +169,8 @@ void task::run(FILE *input)
 {
 	const auto start = chrono::steady_clock::now();
 	
-	//load(input);
-	generate_input(300, 300, 30, 42);
+	load(input);
+	//generate_input(300, 300, 30, 42);
 
 	chrono::duration<int> annealing_duration;
 	chrono::duration<int> initialization_duration;
@@ -203,9 +203,9 @@ std::tuple<chrono::duration<int>, chrono::duration<int>> task::get_available_tim
 	int clusters = cluster_count();
 	int airports = get_number_of_cities();
 
-	if (clusters <= 20 && airports < 50) return {chrono::duration<int>(2), chrono::duration<int>(1)};
-	if (clusters <= 100 && airports < 200) return {chrono::duration<int>(3), chrono::duration<int>(2)};
-	return {chrono::duration<int>(11), chrono::duration<int>(4)};
+	if (clusters <= 20 && airports < 50) return {chrono::duration<int>(15), chrono::duration<int>(1)};
+	if (clusters <= 100 && airports < 200) return {chrono::duration<int>(15), chrono::duration<int>(2)};
+	return {chrono::duration<int>(11), chrono::duration<int>(15)};
 }
 
 void task::generate_input(size_t cluster_count, size_t city_count, float average_branching, size_t seed)
