@@ -46,7 +46,7 @@ solution::solution(const task& data, std::chrono::duration<int> available_time, 
 	_sum_min_cluster_costs = 0;
 	_min_cluster_costs = vector<cost_t>(_cluster_count - 1, 0);
 
-	for (size_t i = 0; i < _cluster_count - 1; ++i)
+	for (int i = 0; i < _cluster_count - 1; ++i)
 	{
 		int cost = _data.get_cluster_cost(_clusters[(i - 1) % (_cluster_count - 1)], _clusters[i], _clusters[i + 1], i);
 		cost = (int)(log2f(cost + 1) + 0.5f);
@@ -384,7 +384,7 @@ void solution::greedy_search_init() {
 	// TODO: DANGER, REMOVE!!!!
 	q.push(path_struct(_start_city, start_cluster, _cluster_count, _previous_city_buffer));
 
-	while (!q.empty() && chrono::steady_clock::now() - start < _available_time*100) 
+	while (!q.empty() && chrono::steady_clock::now() - start < _available_time)
 	{
 		++i;
 
@@ -480,7 +480,7 @@ void solution::greedy_search_init() {
 
 	// TODO: DANGER, REMOVE!!!!
 	city_struct city = _previous_city_buffer[best_solution.head];
-	while (city.city != _start_city)
+	while (city.prev != 0 || city.city != _start_city)
 	{
 		_clusters.push_back(_data.get_city_cluster(city.city));
 		city = _previous_city_buffer[city.prev];
