@@ -11,14 +11,14 @@
 using namespace std;
 
 
-annealing::annealing(const task& data, std::chrono::duration<int> available_time, const std::string& stats_path): _data(data), _available_time(available_time)
+annealing::annealing(const task& data, std::chrono::duration<int> available_time, const std::string& stats_path, chrono::time_point<chrono::steady_clock> start): _data(data), _available_time(available_time), _start(start)
 {
 	//_stats = std::ofstream(stats_path);
 }
 
 void annealing::run(solution& s)
 {
-	_start = chrono::steady_clock::now();
+	auto run_start = chrono::steady_clock::now();
 	_t = config::INITIAL_TEMP * _data.cluster_count();
 
 	energy_t current_energy = s.cost();
@@ -60,7 +60,7 @@ void annealing::run(solution& s)
 		update_temperature();
 	}
 
-	time = chrono::steady_clock::now() - _start;
+	time = chrono::steady_clock::now() - run_start;
 
 	s.set_clusters(move(best_solution));
 }

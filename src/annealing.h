@@ -14,7 +14,7 @@ using temp_t = double;
 class annealing
 {
 public:
-	annealing(const task& data, std::chrono::duration<int> available_time, const std::string& stats_path);
+	annealing(const task& data, std::chrono::duration<int> available_time, const std::string& stats_path, std::chrono::time_point<std::chrono::steady_clock> start);
 
 	void run(solution& s);
 

@@ -172,19 +172,17 @@ void task::run(FILE *input)
 	load(input);
 	//generate_input(300, 300, 30, 42);
 
-	chrono::duration<int> annealing_duration;
-	chrono::duration<int> initialization_duration;
-	tie(annealing_duration, initialization_duration) = get_available_time();
+	auto available_time = get_available_time();
 
-	if (cluster_count() <= 10 && get_number_of_cities() < 20){
-		initialization_duration += annealing_duration;
-		solution s(*this, initialization_duration, solution::init_type::COMPLETE_DFS);
+	if (cluster_count() <= 10 && get_number_of_cities() < 20)
+	{
+		solution s(*this, available_time, solution::init_type::COMPLETE_DFS);
 		s.print(cout);
 	}
-	else {
-
-		annealing search(*this, annealing_duration, "stats.out");
-		solution s(*this, initialization_duration, solution::init_type::GREEDY_DFS);
+	else 
+	{
+		annealing search(*this, available_time, "stats.out", start);
+		solution s(*this, chrono::duration<int>(1), solution::init_type::GREEDY_DFS);
 		search.run(s);
 		s.print(cout);
 
@@ -198,14 +196,14 @@ const vector<pair<city_id_t, cost_t>>& task::get_edges(city_id_t city, int day) 
 	return _edges[day][city];
 }
 
-std::tuple<chrono::duration<int>, chrono::duration<int>> task::get_available_time() const
+chrono::duration<int> task::get_available_time() const
 {
 	int clusters = cluster_count();
 	int airports = get_number_of_cities();
 
-	if (clusters <= 20 && airports < 50) return {chrono::duration<int>(15), chrono::duration<int>(1)};
-	if (clusters <= 100 && airports < 200) return {chrono::duration<int>(15), chrono::duration<int>(2)};
-	return {chrono::duration<int>(11), chrono::duration<int>(15)};
+	if (clusters <= 20 && airports < 50) return chrono::duration<int>(3);
+	if (clusters <= 100 && airports < 200) return chrono::duration<int>(5);
+	return chrono::duration<int>(15);
 }
 
 void task::generate_input(size_t cluster_count, size_t city_count, float average_branching, size_t seed)
