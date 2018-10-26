@@ -15,16 +15,16 @@ void test::check_performance()
 	//check_performance("resources\\TSALESMAN2-1.in");
 	//check_performance("resources\\TSALESMAN2-2.in");
 	//check_performance("resources\\TSALESMAN2-3.in");
-	//check_performance("resources\\TSALESMAN2-4.in");
-	check_performance(150, 250, 20, 1);
-	check_performance(150, 250, 30, 2);
-	check_performance(150, 250, 40, 3);
-	check_performance(150, 250, 50, 4);
-	check_performance(150, 250, 60, 5);
-	check_performance(150, 250, 70, 6);
-	check_performance(150, 250, 80, 7);
-	check_performance(150, 250, 90, 8);
-	check_performance(150, 250, 100, 9);
+	check_performance("resources\\TSALESMAN2-4.in");
+	//check_performance(150, 200, 20, 1);
+	//check_performance(150, 200, 30, 2);
+	//check_performance(150, 200, 40, 3);
+	//check_performance(150, 200, 50, 4);
+	//check_performance(150, 200, 60, 5);
+	//check_performance(150, 200, 70, 6);
+	//check_performance(150, 200, 80, 7);
+	//check_performance(150, 200, 90, 8);
+	//check_performance(150, 200, 100, 9);
 }
 
 void test::check_performance(size_t cluster_count, size_t city_count, float average_branching, size_t seed) {
@@ -65,7 +65,7 @@ void test::run(task &t) {
 	double min_speed = std::numeric_limits<double>::max();
 	double max_speed = 0.0;
 
-	const size_t N = 1;
+	const size_t N = 2;
 
 	for (size_t i = 1; i <= N; ++i)
 	{
@@ -80,19 +80,19 @@ void test::run(task &t) {
 		//
 		// WORKFLOW DEFINITION:
 
-		if (t.cluster_count() <= 10 && t.get_number_of_cities() < 20)
+		if (t.cluster_count() <= 11)
 		{
 			solution s(t, available_time, solution::init_type::COMPLETE_DFS);
-			s.print(cout);
 
 			score = s.cost();
 			tried_count = s.solutions_tried;
 		}
 		else
 		{
-			//annealing search(t, available_time, "stats.out", start);
+			config::GREEDY_SEARCH_EXP = 1.4 + 0.005*((int)t.cluster_count() - 100);
+			annealing search(t, available_time, "stats.out", start);
 			solution s(t, chrono::duration<int>(config::GREEDY_SEARCH_TIME), solution::init_type::GREEDY_DFS);
-			//search.run(s);
+			search.run(s);
 
 			score = s.cost();
 			tried_count = s.solutions_tried;

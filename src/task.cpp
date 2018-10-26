@@ -104,8 +104,6 @@ void task::load(FILE *input)
 		}
 	}
 
-	delete[] city_identifiers_mapping;
-
 	for (int j = 0; j < _cluster_count; ++j)
 	{
 		for (size_t i = 0; i < _city_count; ++i)
@@ -121,6 +119,7 @@ void task::load(FILE *input)
 	_start_city = city_identifiers_mapping[(start_identifier[0] - '0') * 75 * 75 + (start_identifier[1] - '0') * 75 + start_identifier[2] - '0'];
 	_start_cluster = _city_names[_start_city].second;
 
+	delete[] city_identifiers_mapping;
 
 	// cluster to cluster route initialization
 
@@ -170,28 +169,25 @@ void task::load(FILE *input)
 
 void task::run(FILE *input)
 {
-	generate_input(150, 200, 100, 9);
-
 	const auto start = chrono::steady_clock::now();
 
-	//load(input);
+	load(input);
 
 	auto available_time = get_available_time();
 
-	if (cluster_count() <= 10 && get_number_of_cities() < 20)
+	if (_cluster_count <= 11)
 	{
 		solution s(*this, available_time, solution::init_type::COMPLETE_DFS);
 		s.print(cout);
 	}
-	else 
+	else
 	{
+		config::GREEDY_SEARCH_EXP = 1.4 + 0.005*((int)_cluster_count - 100);
 		annealing search(*this, available_time, "stats.out", start);
-		solution s(*this, chrono::duration<int>(config::GREEDY_SEARCH_TIME), solution::init_type::SHUFFLE);
+		solution s(*this, chrono::duration<int>(config::GREEDY_SEARCH_TIME), solution::init_type::GREEDY_DFS);
 		search.run(s);
-		s.print(cout);
 
-		//	cout << "time: " << search.time.count() / 1000000.0 << " ms" << endl;
-		//	cout << "permutations: " << search.permutations << endl << endl;
+		s.print(cout);
 	}
 }
 

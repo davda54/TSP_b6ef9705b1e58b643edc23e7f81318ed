@@ -64,8 +64,8 @@ solution::solution(const task& data, std::chrono::duration<int> available_time, 
 void solution::permute()
 {
 	//distant_swap();
-	clever_swap();
-	//genius_swap();
+	//clever_swap();
+	genius_swap();
 
 	calculate_cost();
 }
@@ -78,7 +78,7 @@ void solution::revert_step()
 
 void solution::submit_step()
 {
-	//recalculate_min_costs();
+	recalculate_min_costs();
 }
 
 void solution::set_clusters(std::vector<cluster_id_t>&& clusters)
