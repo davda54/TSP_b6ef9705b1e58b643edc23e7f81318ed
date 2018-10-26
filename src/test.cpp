@@ -4,7 +4,6 @@
 #include <tuple>
 
 #include "test.h"
-#include "task.h"
 #include "annealing.h"
 
 
@@ -16,6 +15,18 @@ void test::check_performance()
 	//check_performance("resources\\TSALESMAN2-2.in");
 	check_performance("resources\\TSALESMAN2-3.in");
 	check_performance("resources\\TSALESMAN2-4.in");
+
+
+}
+
+void test::check_performance(size_t cluster_count, size_t city_count, float average_branching, size_t seed) {
+
+	cout << "Artificial input, cluster_c: " << cluster_count << ", city_c: " << city_count << ", branching: " << average_branching << endl << endl;
+
+    task t;
+    t.generate_input(cluster_count, city_count, average_branching, seed);
+
+	run(t);
 }
 
 void test::check_performance(const char *path)
@@ -26,8 +37,13 @@ void test::check_performance(const char *path)
     file = fopen(path, "r");
     if (file == nullptr) perror("Error opening file");
 
-	task t;
-	t.load(file);
+    task t;
+    t.load(file);
+
+	run(t);
+}
+
+void test::run(task &t) {
 
 	chrono::duration<int> annealing_duration;
 	chrono::duration<int> initialization_duration;
@@ -77,7 +93,7 @@ void test::check_performance(const char *path)
 		if (speed > max_speed) max_speed = speed;
 
 		cout << "\t" << avg_score;
-	}  
+	}
 
 	cout << "\r";
 	cout << "score average: " << avg_score << endl;
@@ -92,3 +108,4 @@ void test::check_performance(const char *path)
 
 	cout << endl << "===========================================" << endl << endl << endl;
 }
+
