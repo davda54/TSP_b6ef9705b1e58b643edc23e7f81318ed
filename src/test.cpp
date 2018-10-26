@@ -5,6 +5,7 @@
 
 #include "test.h"
 #include "annealing.h"
+#include "config.h"
 
 
 using namespace std;
@@ -83,7 +84,7 @@ void test::run(task &t) {
 		else
 		{
 			annealing search(t, available_time, "stats.out", start);
-			solution s(t, chrono::duration<int>(1), solution::init_type::GREEDY_DFS);
+			solution s(t, chrono::duration<int>(config::GREEDY_SEARCH_TIME), solution::init_type::GREEDY_DFS);
 			search.run(s);
 			s.print(cout);
 
