@@ -24,6 +24,8 @@ public:
 
 	const std::vector<std::pair<city_id_t, cost_t>>& get_edges(city_id_t city, int day) const;
 
+	const std::vector<std::pair<city_id_t, cost_t>>& get_reverse_edges(city_id_t city, int day) const;
+
 	std::chrono::duration<int> get_available_time() const;
 
 	const std::vector<city_id_t> &get_cluster_cities(cluster_id_t cluster) const
@@ -104,6 +106,7 @@ private:
     // first axis day, second city-from, third city-to
     std::vector<std::vector<std::vector<cost_t>>> _graph;
     std::vector<std::vector<std::vector<std::pair<city_id_t, cost_t>>>> _edges;
+	std::vector<std::vector<std::vector<std::pair<city_id_t, cost_t>>>> _reverse_edges;
 	std::vector<std::vector<std::vector<char>>> _cluster_to_cluster_conflict;
 	std::vector<std::vector<std::vector<cost_t>>> _cluster_to_cluster_cost;
 

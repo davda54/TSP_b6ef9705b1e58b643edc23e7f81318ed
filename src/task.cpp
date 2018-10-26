@@ -57,6 +57,7 @@ void task::load(FILE *input)
 	_city_count = _city_names.size();
 	_graph.reserve(_cluster_count);
 	_edges.reserve(_cluster_count);
+	_reverse_edges.reserve(_cluster_count);
 
 	for (int j = 0; j < _cluster_count; ++j)
 	{
@@ -64,6 +65,8 @@ void task::load(FILE *input)
 		b.reserve(_city_count);
 		vector<vector<pair<city_id_t, cost_t>>> d;
 		d.reserve(_city_count);
+		vector<vector<pair<city_id_t, cost_t>>> f;
+		f.reserve(_city_count);
 		for (size_t i = 0; i < _city_count; ++i)
 		{
 			vector<cost_t> c(_city_count, INVALID_ROUTE);
@@ -71,9 +74,13 @@ void task::load(FILE *input)
 			vector<pair<city_id_t, cost_t>> e;
 			e.reserve(8);
 			d.push_back(move(e));
+			vector<pair<city_id_t, cost_t>> g;
+			g.reserve(8);
+			f.push_back(move(g));
 		}
 		_graph.push_back(move(b));
 		_edges.push_back(move(d));
+		_reverse_edges.push_back(move(f));
 	}
 
 	char to_city[4];
@@ -91,15 +98,19 @@ void task::load(FILE *input)
 			for (size_t i = 0; i < _cluster_count; ++i)
 			{
 				_graph[i][from][to] = min(cost_t(cost), _graph[i][from][to]);
-				if (_graph[i][from][to] == cost)
+				if (_graph[i][from][to] == cost) {
 					_edges[i][from].emplace_back(to, cost);
+					_reverse_edges[i][to].emplace_back(from, cost);
+				}
 			}
 		}
 		else
 		{
 			_graph[day - 1][from][to] = min((cost_t) cost, _graph[day - 1][from][to]);
-			if (_graph[day - 1][from][to] == cost)
+			if (_graph[day - 1][from][to] == cost) {
 				_edges[day - 1][from].emplace_back(to, cost);
+				_reverse_edges[day - 1][to].emplace_back(from, cost);
+			}
 		}
 	}
 
@@ -109,6 +120,11 @@ void task::load(FILE *input)
 		{
 			auto& edges = _edges[j][i];
 			sort(edges.begin(), edges.end(),
+				 [](const auto& a, const auto& b) -> bool {
+					 return a.second < b.second;
+				 });
+			auto& reverse_edges = _reverse_edges[j][i];
+			sort(reverse_edges.begin(), reverse_edges.end(),
 				 [](const auto& a, const auto& b) -> bool {
 					 return a.second < b.second;
 				 });
@@ -182,7 +198,7 @@ void task::run(FILE *input)
 	else 
 	{
 		annealing search(*this, available_time, "stats.out", start);
-		solution s(*this, chrono::duration<int>(1), solution::init_type::GREEDY_DFS);
+		solution s(*this, chrono::duration<int>(1), solution::init_type::REVERSE_GREEDY_DFS);
 		search.run(s);
 		s.print(cout);
 
@@ -194,6 +210,11 @@ void task::run(FILE *input)
 const vector<pair<city_id_t, cost_t>>& task::get_edges(city_id_t city, int day) const
 {
 	return _edges[day][city];
+}
+
+const std::vector<std::pair<city_id_t, cost_t>> &task::get_reverse_edges(city_id_t city, int day) const {
+
+	return _reverse_edges[day][city];
 }
 
 chrono::duration<int> task::get_available_time() const
@@ -226,7 +247,7 @@ void task::generate_input(size_t cluster_count, size_t city_count, float average
 		_clusters.push_back(move(cluster_cities));
 	}
 
-	for(size_t i = 0; i < cluster_count - city_count; ++i)
+	for(size_t i = 0; i < city_count - cluster_count; ++i)
 	{
 		auto cluster = rnd() % cluster_count;
 
@@ -336,3 +357,4 @@ void task::generate_input(size_t cluster_count, size_t city_count, float average
 		_cluster_to_cluster_cost.push_back(move(cost_sub_vector));
 	}
 }
+

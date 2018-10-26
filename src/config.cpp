@@ -4,7 +4,7 @@
 // 3.in .. 3, 2.5 ---> 44219  / 42148	  // 41061,  3.8, 0.05
 // 4.in .. 3, 2.3 ---> 111212 / 109968	  // 110008,
 
-float config::GREEDY_SEARCH_EXP = 1.3f;
+float config::GREEDY_SEARCH_EXP = 4.5f;
 int config::GREEDY_SEARCH_KNBRS = 3;
 float config::GREEDY_SEARCH_RATIO = 0.05f;
 
@@ -24,7 +24,7 @@ float config::GREEDY_SEARCH_RATIO = 0.05f;
  *
  */
 
-double config::INITIAL_TEMP = 1;
+double config::INITIAL_TEMP = 1.5;
 double config::COOLING_TEMP = 0.9999998;
 
 int config::GREEDY_SEARCH_TIME = 1;

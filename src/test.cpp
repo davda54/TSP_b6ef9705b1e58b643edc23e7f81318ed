@@ -12,20 +12,20 @@ using namespace std;
 
 void test::check_performance()
 {
-	//check_performance("resources\\TSALESMAN2-1.in");
-	//check_performance("resources\\TSALESMAN2-2.in");
-	check_performance("resources\\TSALESMAN2-3.in");
-	check_performance("resources\\TSALESMAN2-4.in");
-	check_performance(50, 120, 40, 15);
+	//check_performance("../resources/TSALESMAN2-1.in");
+	//check_performance("../resources/TSALESMAN2-2.in");
+	/*check_performance("../resources/TSALESMAN2-3.in");
+	check_performance("../resources/TSALESMAN2-4.in");*/
+	check_performance(150, 250, 20, 1);
 
 }
 
 void test::check_performance(size_t cluster_count, size_t city_count, float average_branching, size_t seed) {
 
-	cout << "Artificial input, cluster_c: " << cluster_count << ", city_c: " << city_count << ", branching: " << average_branching << endl << endl;
-
     task t;
     t.generate_input(cluster_count, city_count, average_branching, seed);
+
+	cout << "Artificial input, cluster_c: " << cluster_count << ", city_c: " << city_count << ", branching: " << average_branching << endl << endl;
 
 	run(t);
 }
@@ -62,7 +62,7 @@ void test::run(task &t) {
 
 	for (size_t i = 1; i <= N; ++i)
 	{
-		cout << "\r" << i;
+		cout << endl << i;
 
 		total_cost_t score = MAX_TOTAL_COST;
 		size_t tried_count = 0;
@@ -73,10 +73,10 @@ void test::run(task &t) {
 		//
 		// WORKFLOW DEFINITION:
 
-		if (t.cluster_count() <= 10 && t.get_number_of_cities() < 20)
+		if (t.cluster_count() < 12 && t.get_number_of_cities() <= 300)
 		{
 			solution s(t, available_time, solution::init_type::COMPLETE_DFS);
-			s.print(cout);
+			//s.print(cout);
 
 			score = s.cost();
 			tried_count = s.solutions_tried;
@@ -85,8 +85,13 @@ void test::run(task &t) {
 		{
 			annealing search(t, available_time, "stats.out", start);
 			solution s(t, chrono::duration<int>(config::GREEDY_SEARCH_TIME), solution::init_type::GREEDY_DFS);
+
+			cout << " " << s.cost();
+
 			search.run(s);
-			s.print(cout);
+			//s.print(cout);
+
+			cout << " " << s.cost();
 
 			score = s.cost();
 			tried_count = s.solutions_tried;

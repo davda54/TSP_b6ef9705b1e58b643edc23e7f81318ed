@@ -15,12 +15,14 @@ public:
 	enum init_type {
 		COMPLETE_DFS,
 		SHUFFLE,
-		GREEDY_DFS
+		GREEDY_DFS,
+		REVERSE_GREEDY_DFS
 	};
 
 	solution(const task& data, std::chrono::duration<int> available_time, init_type init);
 
 	void shuffle_init();
+	void reverse_greedy_search_init();
 	void greedy_search_init();
 	void complete_dfs_init();
 	void complete_dfs_init_recursive(city_id_t city, total_cost_t cost, int length, std::vector<int>& visited_clusters, total_cost_t& best_cost, std::vector<int>& best_path);
@@ -81,9 +83,10 @@ private:
 
 		path_struct(): head(0), length(0), cost(MAX_TOTAL_COST) {}
 
-		path_struct(city_id_t start, cluster_id_t start_cluster, size_t clusters_count, std::vector<city_struct>& succesor_buffer): length(0), cost(0), head(0) {
+		path_struct(city_id_t start, cluster_id_t start_cluster, size_t clusters_count, std::vector<city_struct>& succesor_buffer): length(0), cost(0) {
 			//head = new city_struct(start, nullptr);
 			// TODO: DANGER, REMOVE!!!!
+			head = succesor_buffer.size();
 			succesor_buffer.emplace_back(start, 0);
 			visited_clusters.resize(clusters_count, false);
 			visited_clusters[start_cluster] = true;

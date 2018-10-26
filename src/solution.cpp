@@ -30,6 +30,9 @@ solution::solution(const task& data, std::chrono::duration<int> available_time, 
 		case GREEDY_DFS:
 			greedy_search_init();
 			break;
+        case REVERSE_GREEDY_DFS:
+            reverse_greedy_search_init();
+            break;
 	}
 
 	for (cluster_id_t cluster_id = 0; cluster_id < _data.cluster_count(); ++cluster_id)
@@ -63,9 +66,11 @@ solution::solution(const task& data, std::chrono::duration<int> available_time, 
 
 void solution::permute()
 {
+	clever_swap();
+
 	//if(generator::rnd_float() < 0.5f) clever_swap();
 	//else distant_swap();
-	genius_swap();
+	//genius_swap();
 
 	calculate_cost();
 }
@@ -78,7 +83,7 @@ void solution::revert_step()
 
 void solution::submit_step()
 {
-	recalculate_min_costs();
+	//recalculate_min_costs();
 }
 
 void solution::set_clusters(std::vector<cluster_id_t>&& clusters)
@@ -351,6 +356,109 @@ void solution::shuffle_init() {
 
 }
 
+void solution::reverse_greedy_search_init() {
+
+	auto start = chrono::steady_clock::now();
+
+	_length_multiplier_cache.reserve(_cluster_count + 1);
+	for(size_t i = 0; i <= _cluster_count; ++i)
+	{
+		_length_multiplier_cache.push_back(1.0f / pow(i, config::GREEDY_SEARCH_EXP));
+	}
+
+	auto cmp = [&](const path_struct& left, const path_struct& right) {
+
+		auto cost1 = left.cost * _length_multiplier_cache[left.length];
+		auto cost2 = right.cost * _length_multiplier_cache[right.length];
+
+		if (cost1 == cost2) {
+			return right.length > left.length;
+		}
+
+		return cost1 > cost2;
+	};
+
+	const cluster_id_t start_cluster = _data.get_start_cluster();
+
+	size_t solutions = 0;
+	size_t i = 0;
+
+	bool no_solution = true;
+	path_struct best_solution;
+	queue<path_struct, decltype(cmp)> q(cmp);
+	// TODO: DANGER, REMOVE!!!!
+	_previous_city_buffer.emplace_back(0, 0); // dummy value for end indication
+	for (auto&& end : _data.get_cluster_cities(start_cluster)) {
+		q.push(path_struct(end, start_cluster, _cluster_count, _previous_city_buffer));
+	}
+
+	while (!q.empty() /*&& chrono::steady_clock::now() - start < _available_time*/)
+	{
+		++i;
+
+//#ifdef _PRINT
+		if (i % 10000 == 0) cout << "Population: " << q.size() << ", Best: " << (no_solution ? 0 : best_solution.cost) << ", Solutions: " << solutions << endl;
+//#endif
+
+		path_struct path = q.pop();
+
+		if (path.cost >= best_solution.cost) continue;
+
+		// const auto& edges = _data.get_edges(path.head->city, (cost_t)path.length);
+		// TODO: DANGER, REMOVE!!!!
+		const auto& edges = _data.get_reverse_edges(_previous_city_buffer[path.head].city, (int)_cluster_count - (int)path.length - 1);
+
+		if (path.length == _cluster_count - 1) {
+
+			for (auto&& e : edges) {
+
+				if (e.first != _start_city) continue;
+				path.add(_start_city, start_cluster, e.second, _previous_city_buffer);
+
+				if (no_solution) {
+					best_solution = std::move(path);
+					no_solution = false;
+				}
+				else if (path.cost < best_solution.cost) {
+					best_solution = std::move(path);
+				}
+
+				++solutions;
+				break;
+			}
+			continue;
+		}
+
+		for (int i = 0, j = 0; j < min((size_t) config::GREEDY_SEARCH_KNBRS, edges.size()) && i < edges.size(); ++i) {
+
+			auto& edge = edges[i];
+
+			if (path.visited_clusters[_data.get_city_cluster(edge.first)] || path.cost + edge.second >= best_solution.cost) continue;
+
+			path_struct path_copy = path;
+			path_copy.add(edge.first, _data.get_city_cluster(edge.first), edge.second, _previous_city_buffer);
+			q.push(path_copy);
+			++j;
+		}
+	}
+
+	solutions_tried = i;
+
+	if (no_solution) {
+		shuffle_init();
+		return;
+	}
+
+	// TODO: DANGER, REMOVE!!!!
+	city_struct city = _previous_city_buffer[best_solution.head];
+	while (city.prev != 0)
+	{
+		_clusters.push_back(_data.get_city_cluster(city.city));
+		city = _previous_city_buffer[city.prev];
+	}
+
+}
+
 void solution::greedy_search_init() {
 
     auto start = chrono::steady_clock::now();
@@ -388,9 +496,9 @@ void solution::greedy_search_init() {
 	{
 		++i;
 
-//#ifdef _PRINT
+#ifdef _PRINT
 		if (i % 10000 == 0) cout << "Population: " << q.size() << ", Best: " << (no_solution ? 0 : best_solution.cost) << ", Solutions: " << solutions << endl;
-//#endif
+#endif
 			
 		path_struct path = q.pop();
 
