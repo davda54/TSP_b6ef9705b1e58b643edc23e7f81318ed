@@ -9,6 +9,7 @@
 #include <tuple>
 
 #include "annealing.h"
+#include "config.h"
 
 using namespace std;
 
@@ -57,7 +58,7 @@ void task::load(FILE *input)
 	_city_count = _city_names.size();
 	_graph.reserve(_cluster_count);
 	_edges.reserve(_cluster_count);
-	_reverse_edges.reserve(_cluster_count);
+	//_reverse_edges.reserve(_cluster_count);
 
 	for (int j = 0; j < _cluster_count; ++j)
 	{
@@ -65,8 +66,8 @@ void task::load(FILE *input)
 		b.reserve(_city_count);
 		vector<vector<pair<city_id_t, cost_t>>> d;
 		d.reserve(_city_count);
-		vector<vector<pair<city_id_t, cost_t>>> f;
-		f.reserve(_city_count);
+		//vector<vector<pair<city_id_t, cost_t>>> f;
+		//f.reserve(_city_count);
 		for (size_t i = 0; i < _city_count; ++i)
 		{
 			vector<cost_t> c(_city_count, INVALID_ROUTE);
@@ -75,12 +76,12 @@ void task::load(FILE *input)
 			e.reserve(8);
 			d.push_back(move(e));
 			vector<pair<city_id_t, cost_t>> g;
-			g.reserve(8);
-			f.push_back(move(g));
+			//g.reserve(8);
+			//f.push_back(move(g));
 		}
 		_graph.push_back(move(b));
 		_edges.push_back(move(d));
-		_reverse_edges.push_back(move(f));
+		//_reverse_edges.push_back(move(f));
 	}
 
 	char to_city[4];
@@ -100,7 +101,7 @@ void task::load(FILE *input)
 				_graph[i][from][to] = min(cost_t(cost), _graph[i][from][to]);
 				if (_graph[i][from][to] == cost) {
 					_edges[i][from].emplace_back(to, cost);
-					_reverse_edges[i][to].emplace_back(from, cost);
+					//_reverse_edges[i][to].emplace_back(from, cost);
 				}
 			}
 		}
@@ -109,7 +110,7 @@ void task::load(FILE *input)
 			_graph[day - 1][from][to] = min((cost_t) cost, _graph[day - 1][from][to]);
 			if (_graph[day - 1][from][to] == cost) {
 				_edges[day - 1][from].emplace_back(to, cost);
-				_reverse_edges[day - 1][to].emplace_back(from, cost);
+				//_reverse_edges[day - 1][to].emplace_back(from, cost);
 			}
 		}
 	}
@@ -123,17 +124,18 @@ void task::load(FILE *input)
 				 [](const auto& a, const auto& b) -> bool {
 					 return a.second < b.second;
 				 });
-			auto& reverse_edges = _reverse_edges[j][i];
+			/*auto& reverse_edges = _reverse_edges[j][i];
 			sort(reverse_edges.begin(), reverse_edges.end(),
 				 [](const auto& a, const auto& b) -> bool {
 					 return a.second < b.second;
-				 });
+				 });*/
 		}
 	}
 
 	_start_city = city_identifiers_mapping[(start_identifier[0] - '0') * 75 * 75 + (start_identifier[1] - '0') * 75 + start_identifier[2] - '0'];
 	_start_cluster = _city_names[_start_city].second;
 
+	delete[] city_identifiers_mapping;
 
 	// cluster to cluster route initialization
 
@@ -184,26 +186,24 @@ void task::load(FILE *input)
 void task::run(FILE *input)
 {
 	const auto start = chrono::steady_clock::now();
-	
+
 	load(input);
-	//generate_input(300, 300, 30, 42);
 
 	auto available_time = get_available_time();
 
-	if (cluster_count() <= 10 && get_number_of_cities() < 20)
+	if (_cluster_count <= 11)
 	{
 		solution s(*this, available_time, solution::init_type::COMPLETE_DFS);
 		s.print(cout);
 	}
-	else 
+	else
 	{
+		config::GREEDY_SEARCH_EXP = 1.4 + 0.005*((int)_cluster_count - 100);
 		annealing search(*this, available_time, "stats.out", start);
-		solution s(*this, chrono::duration<int>(1), solution::init_type::REVERSE_GREEDY_DFS);
+		solution s(*this, chrono::duration<int>(config::GREEDY_SEARCH_TIME), solution::init_type::GREEDY_DFS);
 		search.run(s);
-		s.print(cout);
 
-		//	cout << "time: " << search.time.count() / 1000000.0 << " ms" << endl;
-		//	cout << "permutations: " << search.permutations << endl << endl;
+		s.print(cout);
 	}
 }
 
@@ -247,12 +247,12 @@ void task::generate_input(size_t cluster_count, size_t city_count, float average
 		_clusters.push_back(move(cluster_cities));
 	}
 
-	for(size_t i = 0; i < city_count - cluster_count; ++i)
+	for(int i = 0; i < city_count - cluster_count; ++i)
 	{
 		auto cluster = rnd() % cluster_count;
 
 		_clusters[cluster].push_back(_city_names.size());
-		_city_names.emplace_back(to_string(_city_names.size()), _city_names.size());
+		_city_names.emplace_back(to_string(_city_names.size()), cluster);
 	}
 
 	_city_count = _city_names.size();
@@ -357,4 +357,3 @@ void task::generate_input(size_t cluster_count, size_t city_count, float average
 		_cluster_to_cluster_cost.push_back(move(cost_sub_vector));
 	}
 }
-
