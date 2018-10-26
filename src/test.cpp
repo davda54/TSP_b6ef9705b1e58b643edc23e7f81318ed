@@ -15,7 +15,7 @@ void test::check_performance()
 	//check_performance("resources\\TSALESMAN2-2.in");
 	check_performance("resources\\TSALESMAN2-3.in");
 	check_performance("resources\\TSALESMAN2-4.in");
-
+	check_performance(50, 120, 40, 15);
 
 }
 
@@ -63,16 +63,39 @@ void test::run(task &t) {
 	{
 		cout << "\r" << i;
 
+		total_cost_t score = MAX_TOTAL_COST;
+		size_t tried_count = 0;
+
 		auto start = chrono::steady_clock::now();
 
-		//annealing s(t, max_duration, "stats.out");
-		solution solution(t, available_time, solution::init_type::GREEDY_DFS);
-		//s.run(solution);
+
+		//
+		// WORKFLOW DEFINITION:
+
+		if (t.cluster_count() <= 10 && t.get_number_of_cities() < 20)
+		{
+			solution s(t, available_time, solution::init_type::COMPLETE_DFS);
+			s.print(cout);
+
+			score = s.cost();
+			tried_count = s.solutions_tried;
+		}
+		else
+		{
+			annealing search(t, available_time, "stats.out", start);
+			solution s(t, chrono::duration<int>(1), solution::init_type::GREEDY_DFS);
+			search.run(s);
+			s.print(cout);
+
+			score = s.cost();
+			tried_count = s.solutions_tried;
+		}
+
+		// END OF WORKFLOW DEFINITION
+		//
+
 
 		auto time = (chrono::steady_clock::now() - start).count() / 1000000000.0f;
-
-
-		auto score = solution.cost();
 
 		auto new_avg_score = avg_score + (score - avg_score) / i;
 		var_score += (score - avg_score)*(score - new_avg_score);
@@ -81,7 +104,7 @@ void test::run(task &t) {
 		if (score < min_score) min_score = score;
 		if (score > max_score) max_score = score;
 
-		auto speed = solution.solutions_tried / time;
+		auto speed = tried_count / time;
 
 		auto new_avg_speed = avg_speed + (speed - avg_speed) / i;
 		var_speed += (speed - avg_speed)*(speed - new_avg_speed);
