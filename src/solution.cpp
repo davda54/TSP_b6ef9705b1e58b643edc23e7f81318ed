@@ -388,9 +388,9 @@ void solution::greedy_search_init() {
 	{
 		++i;
 
-//#ifdef _PRINT
+#ifdef _PRINT
 		if (i % 100000 == 0) cout << "Population: " << q.size() << ", Best: " << (no_solution ? 0 : best_solution.cost) << ", Solutions: " << solutions << endl;
-//#endif
+#endif
 			
 		path_struct path = q.pop();
 
@@ -463,11 +463,11 @@ void solution::greedy_search_init() {
 
 	solutions_tried = i;
 
+
 	if (no_solution) {
 		shuffle_init();
 		return;
 	}
-
 
 	// MEMORY LEAK! but intented, 'cause who cares in the limited time
 //	city_struct* city = best_solution.head;
@@ -485,7 +485,6 @@ void solution::greedy_search_init() {
 		_clusters.push_back(_data.get_city_cluster(city.city));
 		city = _previous_city_buffer[city.prev];
 	}
-
 
 	reverse(_clusters.begin(), _clusters.end());
 }

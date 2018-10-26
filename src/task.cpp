@@ -104,6 +104,8 @@ void task::load(FILE *input)
 		}
 	}
 
+	delete[] city_identifiers_mapping;
+
 	for (int j = 0; j < _cluster_count; ++j)
 	{
 		for (size_t i = 0; i < _city_count; ++i)
@@ -168,10 +170,11 @@ void task::load(FILE *input)
 
 void task::run(FILE *input)
 {
+	generate_input(150, 200, 100, 9);
+
 	const auto start = chrono::steady_clock::now();
-	
-	load(input);
-	//generate_input(300, 300, 30, 42);
+
+	//load(input);
 
 	auto available_time = get_available_time();
 
@@ -183,7 +186,7 @@ void task::run(FILE *input)
 	else 
 	{
 		annealing search(*this, available_time, "stats.out", start);
-		solution s(*this, chrono::duration<int>(config::GREEDY_SEARCH_TIME), solution::init_type::GREEDY_DFS);
+		solution s(*this, chrono::duration<int>(config::GREEDY_SEARCH_TIME), solution::init_type::SHUFFLE);
 		search.run(s);
 		s.print(cout);
 
@@ -227,12 +230,12 @@ void task::generate_input(size_t cluster_count, size_t city_count, float average
 		_clusters.push_back(move(cluster_cities));
 	}
 
-	for(size_t i = 0; i < cluster_count - city_count; ++i)
+	for(int i = 0; i < city_count - cluster_count; ++i)
 	{
 		auto cluster = rnd() % cluster_count;
 
 		_clusters[cluster].push_back(_city_names.size());
-		_city_names.emplace_back(to_string(_city_names.size()), _city_names.size());
+		_city_names.emplace_back(to_string(_city_names.size()), cluster);
 	}
 
 	_city_count = _city_names.size();

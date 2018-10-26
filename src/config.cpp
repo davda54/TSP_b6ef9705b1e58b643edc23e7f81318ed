@@ -24,7 +24,7 @@ float config::GREEDY_SEARCH_RATIO = 0.05f;
  *
  */
 
-double config::INITIAL_TEMP = 3;
-double config::COOLING_TEMP = 0.99999995;
+double config::INITIAL_TEMP = 0.8;
+double config::COOLING_TEMP = 0.9999991;
 
-int config::GREEDY_SEARCH_TIME = 1;
+int config::GREEDY_SEARCH_TIME = 15;
