@@ -384,14 +384,14 @@ void solution::greedy_search_init() {
 	// TODO: DANGER, REMOVE!!!!
 	q.push(path_struct(_start_city, start_cluster, _cluster_count, _previous_city_buffer));
 
-	while (!q.empty() && (chrono::steady_clock::now() - start).count() / 1000000000.0f < 60.0f) {
-
+	while (!q.empty() && chrono::steady_clock::now() - start < _available_time*100) 
+	{
 		++i;
 
 //#ifdef _PRINT
-		if (i % 100000 == 0) cout << "Population: " << q.size() << ", Best: " << (no_solution ? 0 : best_solution.cost) << ", Solutions: " << solutions << endl;
+		if (i % 10000 == 0) cout << "Population: " << q.size() << ", Best: " << (no_solution ? 0 : best_solution.cost) << ", Solutions: " << solutions << endl;
 //#endif
-
+			
 		path_struct path = q.pop();
 
 		if (path.cost >= best_solution.cost) continue;

@@ -31,6 +31,9 @@ public:
     static float GREEDY_SEARCH_EXP;
     static int GREEDY_SEARCH_KNBRS;
     static float GREEDY_SEARCH_RATIO; // 1 -> average, 0 -> min
+	static int GREEDY_SEARCH_TIME;
+
+#define K_NEIGHBOURS
 
 };
 

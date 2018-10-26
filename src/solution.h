@@ -139,6 +139,5 @@ private:
 	std::vector<city_struct> _previous_city_buffer;
 };
 
-#define K_NEIGHBOURS
 
 #endif
