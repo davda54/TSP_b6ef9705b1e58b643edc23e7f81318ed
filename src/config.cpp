@@ -6,7 +6,7 @@
 
 float config::GREEDY_SEARCH_EXP = 1.5f;
 int config::GREEDY_SEARCH_KNBRS = 3;
-float config::GREEDY_SEARCH_RATIO = 0.05f;
+float config::GREEDY_SEARCH_RATIO = 0.1f;
 
 
 /* resources\TSALESMAN2-1.in, INITIAL_TEMP = 10*10, COOLING_TEMP = 0.99999994
@@ -24,7 +24,7 @@ float config::GREEDY_SEARCH_RATIO = 0.05f;
  *
  */
 
-double config::INITIAL_TEMP = 1.25;
-double config::COOLING_TEMP = 0.9999998;
+double config::INITIAL_TEMP = 1.0f;
+double config::COOLING_TEMP = 0.99999985;
 
 int config::GREEDY_SEARCH_TIME = 1;

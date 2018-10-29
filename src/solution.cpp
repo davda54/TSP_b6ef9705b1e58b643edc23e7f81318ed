@@ -14,7 +14,7 @@ solution::solution(const task& data, std::chrono::duration<int> available_time, 
 	: _data(data), _available_time(available_time)
 {
     // TODO: DANGER, REMOVE!!!!
-    _previous_city_buffer.reserve(5000000);
+    _previous_city_buffer.reserve(500000);
 
 	_start = chrono::steady_clock::now();
 	_cluster_count = _data.cluster_count();
@@ -66,9 +66,9 @@ solution::solution(const task& data, std::chrono::duration<int> available_time, 
 
 void solution::permute()
 {
-	//distant_swap();
-	//clever_swap();
-	genius_swap();
+	if (generator::rnd_float() < 0.3) more_genius_swap();
+	else if (generator::rnd_float() < 0.325) distant_swap();
+	else genius_swap();
 
 	calculate_cost();
 }
@@ -127,7 +127,7 @@ void solution::distant_swap()
 
 void solution::clever_swap()
 {
-	for (size_t i = 0; i < 100; ++i)
+	for (size_t i = 0; i < 50; ++i)
 	{
 		_swapped_1 = generator::rnd_int() % (_cluster_count - 1);
 		_swapped_2 = generator::rnd_int() % (_cluster_count - 1);
@@ -145,21 +145,12 @@ void solution::clever_swap()
 		const auto b = _clusters[_swapped_2];
 		const auto b_n = _clusters[_swapped_2 + 1];
 
-		// a_p---a---a_n  ...  b_p---b---b_n
-		/*const auto conflicts_before = 
-			  _data.get_conflict(a_p, a, _swapped_1)
-			+ _data.get_conflict(a, a_n, _swapped_1 + 1)
-			+ _data.get_conflict(b_p, b, _swapped_2)
-			+ _data.get_conflict(b, b_n, _swapped_2 + 1);*/
-
-		// a_p---b---a_n  ...  b_p---a---b_n
-		const auto conflict_after =
-			  _data.get_conflict(a_p, b, _swapped_1)
-			+ _data.get_conflict(b, a_n, _swapped_1 + 1)
-			+ _data.get_conflict(b_p, a, _swapped_2)
-			+ _data.get_conflict(a, b_n, _swapped_2 + 1);
-
-		if (conflict_after == 0) break;
+		if (!_data.get_conflict(a_p, b, _swapped_1) &&
+			!_data.get_conflict(b, a_n, _swapped_1 + 1) &&
+			!_data.get_conflict(b_p, a, _swapped_2) &&
+			!_data.get_conflict(a, b_n, _swapped_2 + 1)
+			)
+			break;
 	}
 
 	if (_swapped_1 > _swapped_2)
@@ -176,6 +167,10 @@ void solution::genius_swap()
 {
 	_swapped_1 = roulette_selector();
 
+	const auto a_p = _clusters[(_swapped_1 - 1) % (_cluster_count - 1)];
+	const auto a = _clusters[_swapped_1];
+	const auto a_n = _clusters[_swapped_1 + 1];
+
 	for (size_t i = 0; i < 100; ++i)
 	{
 		_swapped_2 = generator::rnd_int() % (_cluster_count - 1);
@@ -184,10 +179,6 @@ void solution::genius_swap()
 		{
 			_swapped_2 = (_swapped_2 + 1) % (_cluster_count - 1);
 		}
-
-		const auto a_p = _clusters[(_swapped_1 - 1) % (_cluster_count - 1)];
-		const auto a = _clusters[_swapped_1];
-		const auto a_n = _clusters[_swapped_1 + 1];
 
 		const auto b_p = _clusters[(_swapped_2 - 1) % (_cluster_count - 1)];
 		const auto b = _clusters[_swapped_2];
@@ -201,14 +192,61 @@ void solution::genius_swap()
 			+ _data.get_conflict(b, b_n, _swapped_2 + 1);*/
 
 		// a_p---b---a_n  ...  b_p---a---b_n
-		const auto conflict_after =
-			_data.get_conflict(a_p, b, _swapped_1)
-			+ _data.get_conflict(b, a_n, _swapped_1 + 1)
-			+ _data.get_conflict(b_p, a, _swapped_2)
-			+ _data.get_conflict(a, b_n, _swapped_2 + 1);
-
-		if (conflict_after == 0) break;
+		if (!_data.get_conflict(a_p, b, _swapped_1) &&
+			!_data.get_conflict(b, a_n, _swapped_1 + 1) &&
+			!_data.get_conflict(b_p, a, _swapped_2) &&
+			!_data.get_conflict(a, b_n, _swapped_2 + 1)
+			)
+			break;
 	}
+
+	if (_swapped_1 > _swapped_2)
+	{
+		_swapped_1 ^= _swapped_2;
+		_swapped_2 ^= _swapped_1;
+		_swapped_1 ^= _swapped_2;
+	}
+
+	swap();
+}
+
+void solution::more_genius_swap()
+{
+	_swapped_1 = roulette_selector();
+	_swapped_2 = -1;
+
+	const auto a_p = _clusters[(_swapped_1 - 1) % (_cluster_count - 1)];
+	const auto a = _clusters[_swapped_1];
+	const auto a_n = _clusters[_swapped_1 + 1];
+
+	auto best_score = MAX_TOTAL_COST;
+
+	for (size_t i = 0; i < _cluster_count - 1; ++i)
+	{
+		if (i == _swapped_1) continue;
+		
+		const auto b_p = _clusters[(i - 1) % (_cluster_count - 1)];
+		const auto b = _clusters[i];
+		const auto b_n = _clusters[i + 1];
+
+		// a_p---b---a_n  ...  b_p---a---b_n
+		if (_data.get_conflict(a_p, b, _swapped_1) ||
+			_data.get_conflict(b, a_n, _swapped_1 + 1) ||
+			_data.get_conflict(b_p, a, i) ||
+			_data.get_conflict(a, b_n, i + 1)
+			)
+			continue;
+
+		auto score = _data.get_cluster_cost(a_p, b, a_n, _swapped_1) + _data.get_cluster_cost(b_p, a, b_n, i);
+
+		if(score < best_score)
+		{
+			_swapped_2 = i;
+			best_score = score;
+		}
+	}
+
+	if (_swapped_2 == -1) return distant_swap();
 
 	if (_swapped_1 > _swapped_2)
 	{
@@ -390,13 +428,13 @@ void solution::reverse_greedy_search_init() {
 		q.push(path_struct(end, start_cluster, _cluster_count, _previous_city_buffer));
 	}
 
-	while (!q.empty() /*&& chrono::steady_clock::now() - start < _available_time*/)
+	while (!q.empty() && chrono::steady_clock::now() - start < _available_time)
 	{
 		++i;
 
-//#ifdef _PRINT
-		if (i % 10000 == 0) cout << "Population: " << q.size() << ", Best: " << (no_solution ? 0 : best_solution.cost) << ", Solutions: " << solutions << endl;
-//#endif
+#ifdef _PRINT
+		if (i % 100000 == 0) cout << "Population: " << q.size() << ", Best: " << (no_solution ? 0 : best_solution.cost) << ", Solutions: " << solutions << endl;
+#endif
 
 		path_struct path = q.pop();
 
@@ -427,7 +465,8 @@ void solution::reverse_greedy_search_init() {
 			continue;
 		}
 
-		for (int i = 0, j = 0; j < min((size_t) config::GREEDY_SEARCH_KNBRS, edges.size()) && i < edges.size(); ++i) {
+		int K = min((int)edges.size(), max(config::GREEDY_SEARCH_KNBRS, 12 - int(path.length)));
+		for (int i = 0, j = 0; j < K && i < edges.size(); ++i) {
 
 			auto& edge = edges[i];
 
@@ -495,7 +534,7 @@ void solution::greedy_search_init() {
 		++i;
 
 #ifdef _PRINT
-		if (i % 100000 == 0) cout << "Population: " << q.size() << ", Best: " << (no_solution ? 0 : best_solution.cost) << ", Solutions: " << solutions << endl;
+		if (i % 100000 == 0) cout << " Population: " << q.size() << ", Best: " << (no_solution ? 0 : best_solution.cost) << ", Solutions: " << solutions << endl;
 #endif
 			
 		path_struct path = q.pop();
@@ -528,7 +567,10 @@ void solution::greedy_search_init() {
 		}
 
 #ifdef K_NEIGHBOURS
-		for (int i = 0, j = 0; j < min((size_t) config::GREEDY_SEARCH_KNBRS, edges.size()) && i < edges.size(); ++i) {
+
+		int K = min((int)edges.size(), max(config::GREEDY_SEARCH_KNBRS, 12 - int(path.length) - 100));
+
+		for (int i = 0, j = 0; j < K && i < edges.size(); ++i) {
 
 			auto& edge = edges[i];
 
@@ -548,18 +590,18 @@ void solution::greedy_search_init() {
 			if (e.second < min) min = e.second;
 		}
 		average /= edges.size();
-		auto threshold = min + (average - min) * GREEDY_SEARCH_RATIO;
+		auto threshold = min + (average - min) * config::GREEDY_SEARCH_RATIO;
 		int used = 0;
 
 		for (auto&& e : edges) {
 
-			if (e.second > threshold && used >= std::min(edges.size(), (size_t)GREEDY_SEARCH_KNBRS)) break;
+			if (e.second > threshold && used >= std::min(edges.size(), (size_t)config::GREEDY_SEARCH_KNBRS)) break;
 
 			if (path.visited_clusters[_data.get_city_cluster(e.first)] ||
 			 	path.cost + e.second >= best_solution.cost) continue;
 
 			path_struct path_copy = path;
-			path_copy.add(e.first, _data.get_city_cluster(e.first), e.second);
+			path_copy.add(e.first, _data.get_city_cluster(e.first), e.second, _previous_city_buffer);
 			q.push(path_copy);
 			++used;
 		}
@@ -582,6 +624,8 @@ void solution::greedy_search_init() {
 //		_clusters.push_back(_data.get_city_cluster(city->city));
 //		city = city->prev;
 //	}
+
+	config::INITIAL_TEMP /= 2;
 
 	// TODO: DANGER, REMOVE!!!!
 	city_struct city = _previous_city_buffer[best_solution.head];

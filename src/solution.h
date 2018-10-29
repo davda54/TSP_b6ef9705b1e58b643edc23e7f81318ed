@@ -43,6 +43,8 @@ private:
 	void distant_swap();
 	void clever_swap();
 	void genius_swap();
+	void more_genius_swap();
+
 	void swap()
 	{
 		_clusters[_swapped_1] ^= _clusters[_swapped_2];

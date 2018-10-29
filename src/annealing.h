@@ -23,7 +23,7 @@ public:
 
 private:
 
-	float acceptance_probability(energy_t current, energy_t next) const;
+	float acceptance_probability(energy_t current, energy_t next, energy_t best) const;
 	void update_temperature();
 
 	temp_t _t;

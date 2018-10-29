@@ -13,6 +13,8 @@
 
 using namespace std;
 
+bool* task::_cluster_to_cluster_conflict;
+cost_t* task::_cluster_to_cluster_cost;
 
 void task::load(FILE *input)
 {
@@ -20,6 +22,7 @@ void task::load(FILE *input)
 	unsigned int cluster_count;
 	fscanf(input, "%u %s\n", &cluster_count, start_identifier);
 	_cluster_count = cluster_count;
+	_cluster_count_to_2 = _cluster_count * _cluster_count;
 
 	city_id_t* city_identifiers_mapping = new city_id_t[75*75*75];
 
@@ -58,7 +61,7 @@ void task::load(FILE *input)
 	_city_count = _city_names.size();
 	_graph.reserve(_cluster_count);
 	_edges.reserve(_cluster_count);
-	//_reverse_edges.reserve(_cluster_count);
+	_reverse_edges.reserve(_cluster_count);
 
 	for (int j = 0; j < _cluster_count; ++j)
 	{
@@ -66,8 +69,8 @@ void task::load(FILE *input)
 		b.reserve(_city_count);
 		vector<vector<pair<city_id_t, cost_t>>> d;
 		d.reserve(_city_count);
-		//vector<vector<pair<city_id_t, cost_t>>> f;
-		//f.reserve(_city_count);
+		vector<vector<pair<city_id_t, cost_t>>> f;
+		f.reserve(_city_count);
 		for (size_t i = 0; i < _city_count; ++i)
 		{
 			vector<cost_t> c(_city_count, INVALID_ROUTE);
@@ -76,12 +79,12 @@ void task::load(FILE *input)
 			e.reserve(8);
 			d.push_back(move(e));
 			vector<pair<city_id_t, cost_t>> g;
-			//g.reserve(8);
-			//f.push_back(move(g));
+			g.reserve(8);
+			f.push_back(move(g));
 		}
 		_graph.push_back(move(b));
 		_edges.push_back(move(d));
-		//_reverse_edges.push_back(move(f));
+		_reverse_edges.push_back(move(f));
 	}
 
 	char to_city[4];
@@ -94,6 +97,8 @@ void task::load(FILE *input)
 		city_id_t from = city_identifiers_mapping[(from_city[0] - '0') * 75 * 75 + (from_city[1] - '0') * 75 + from_city[2] - '0'];
 		city_id_t to = city_identifiers_mapping[(to_city[0] - '0') * 75 * 75 + (to_city[1] - '0') * 75 + to_city[2] - '0'];
 
+		//if (cost > 1000) cost += 10000;
+
 		if (day == 0)
 		{
 			for (size_t i = 0; i < _cluster_count; ++i)
@@ -101,7 +106,7 @@ void task::load(FILE *input)
 				_graph[i][from][to] = min(cost_t(cost), _graph[i][from][to]);
 				if (_graph[i][from][to] == cost) {
 					_edges[i][from].emplace_back(to, cost);
-					//_reverse_edges[i][to].emplace_back(from, cost);
+					_reverse_edges[i][to].emplace_back(from, cost);
 				}
 			}
 		}
@@ -110,7 +115,7 @@ void task::load(FILE *input)
 			_graph[day - 1][from][to] = min((cost_t) cost, _graph[day - 1][from][to]);
 			if (_graph[day - 1][from][to] == cost) {
 				_edges[day - 1][from].emplace_back(to, cost);
-				//_reverse_edges[day - 1][to].emplace_back(from, cost);
+				_reverse_edges[day - 1][to].emplace_back(from, cost);
 			}
 		}
 	}
@@ -124,11 +129,11 @@ void task::load(FILE *input)
 				 [](const auto& a, const auto& b) -> bool {
 					 return a.second < b.second;
 				 });
-			/*auto& reverse_edges = _reverse_edges[j][i];
+			auto& reverse_edges = _reverse_edges[j][i];
 			sort(reverse_edges.begin(), reverse_edges.end(),
 				 [](const auto& a, const auto& b) -> bool {
 					 return a.second < b.second;
-				 });*/
+				 });
 		}
 	}
 
@@ -139,29 +144,19 @@ void task::load(FILE *input)
 
 	// cluster to cluster route initialization
 
-	_cluster_to_cluster_conflict.reserve(_cluster_count);
-	_cluster_to_cluster_cost.reserve(_cluster_count);
+	_cluster_to_cluster_conflict = new bool[_cluster_count*_cluster_count*_cluster_count];
+	_cluster_to_cluster_cost = new cost_t[_cluster_count*_cluster_count*_cluster_count];
 
 	for (size_t d = 0; d < _cluster_count; ++d)
 	{
-		vector<vector<char>> conflict_sub_vector;
-		vector<vector<cost_t>> cost_sub_vector;
-		conflict_sub_vector.reserve(_cluster_count);
-		cost_sub_vector.reserve(_cluster_count);
-
 		for (size_t i = 0; i < _cluster_count; ++i)
 		{
-			vector<char> conflict_sub_sub_vector;
-			vector<cost_t> cost_sub_sub_vector;
-			conflict_sub_sub_vector.reserve(_cluster_count);
-			cost_sub_sub_vector.reserve(_cluster_count);
-
 			for (size_t j = 0; j < _cluster_count; ++j)
 			{
 				if (i == j)
 				{
-					conflict_sub_sub_vector.push_back(0);
-					cost_sub_sub_vector.push_back(0);
+					_cluster_to_cluster_conflict[d*_cluster_count_to_2 + i * _cluster_count + j] = false;
+					_cluster_to_cluster_cost[d*_cluster_count_to_2 + i * _cluster_count + j] = 0;
 					continue;
 				}
 
@@ -170,16 +165,10 @@ void task::load(FILE *input)
 				{
 					min_cost = min(min_cost, get_cost(city_i, city_j, d));
 				}
-				conflict_sub_sub_vector.push_back(min_cost == INVALID_ROUTE ? 1 : 0);
-				cost_sub_sub_vector.push_back(min_cost);
+				_cluster_to_cluster_conflict[d*_cluster_count_to_2 + i * _cluster_count + j] = min_cost == INVALID_ROUTE;
+				_cluster_to_cluster_cost[d*_cluster_count_to_2 + i * _cluster_count + j] = min_cost;
 			}
-
-			conflict_sub_vector.push_back(move(conflict_sub_sub_vector));
-			cost_sub_vector.push_back(move(cost_sub_sub_vector));
 		}
-
-		_cluster_to_cluster_conflict.push_back(move(conflict_sub_vector));
-		_cluster_to_cluster_cost.push_back(move(cost_sub_vector));
 	}
 }
 
@@ -193,12 +182,12 @@ void task::run(FILE *input)
 
 	if (_cluster_count <= 11)
 	{
-		solution s(*this, available_time, solution::init_type::COMPLETE_DFS);
+		solution s(*this, available_time, solution::init_type::REVERSE_GREEDY_DFS);
 		s.print(cout);
 	}
 	else
 	{
-		config::GREEDY_SEARCH_EXP = 1.4 + 0.005*((int)_cluster_count - 100);
+		config::GREEDY_SEARCH_EXP = 1.4 + 0.005*((int)_cluster_count- 100);
 		annealing search(*this, available_time, "stats.out", start);
 		solution s(*this, chrono::duration<int>(config::GREEDY_SEARCH_TIME), solution::init_type::GREEDY_DFS);
 		search.run(s);
@@ -229,131 +218,131 @@ chrono::duration<int> task::get_available_time() const
 
 void task::generate_input(size_t cluster_count, size_t city_count, float average_branching, size_t seed)
 {
-	mt19937 rnd = mt19937(seed);
-	std::normal_distribution<double> normal_distribution(1000, 250);
+	//mt19937 rnd = mt19937(seed);
+	//std::normal_distribution<double> normal_distribution(1000, 250);
 
-	_cluster_count = cluster_count;
-
-
-	// create cities
-
-	for (size_t i = 0; i < _cluster_count; ++i)
-	{
-		vector<city_id_t> cluster_cities;
-
-		cluster_cities.push_back(i);
-		_city_names.emplace_back(to_string(i), i);
-
-		_clusters.push_back(move(cluster_cities));
-	}
-
-	for(int i = 0; i < city_count - cluster_count; ++i)
-	{
-		auto cluster = rnd() % cluster_count;
-
-		_clusters[cluster].push_back(_city_names.size());
-		_city_names.emplace_back(to_string(_city_names.size()), cluster);
-	}
-
-	_city_count = _city_names.size();
+	//_cluster_count = cluster_count;
 
 
-	// create edges
+	//// create cities
 
-	_graph.reserve(_cluster_count);
-	_edges.reserve(_cluster_count);
+	//for (size_t i = 0; i < _cluster_count; ++i)
+	//{
+	//	vector<city_id_t> cluster_cities;
 
-	for (int j = 0; j < _cluster_count; ++j)
-	{
-		vector<vector<cost_t>> b;
-		b.reserve(_city_count);
-		vector<vector<pair<city_id_t, cost_t>>> d;
-		d.reserve(_city_count);
-		for (size_t i = 0; i < _city_count; ++i)
-		{
-			vector<cost_t> c(_city_count, INVALID_ROUTE);
-			b.push_back(move(c));
-			vector<pair<city_id_t, cost_t>> e;
-			e.reserve(8);
-			d.push_back(move(e));
-		}
-		_graph.push_back(move(b));
-		_edges.push_back(move(d));
-	}
+	//	cluster_cities.push_back(i);
+	//	_city_names.emplace_back(to_string(i), i);
 
-	for(size_t i = 0; i < cluster_count*city_count*average_branching; ++i)
-	{
-		city_id_t from = rnd() % city_count;
-		city_id_t to = rnd() % city_count;
-		size_t day = rnd() % cluster_count;
-		int cost = (int)(normal_distribution(rnd) + 0.5f);
+	//	_clusters.push_back(move(cluster_cities));
+	//}
 
-		while(to == from) to = rnd() % city_count;
-		if (cost < 1) cost = 1;
+	//for(int i = 0; i < city_count - cluster_count; ++i)
+	//{
+	//	auto cluster = rnd() % cluster_count;
 
-		_graph[day][from][to] = min(cost_t(cost), _graph[day][from][to]);
-		if (_graph[day][from][to] == cost) _edges[day][from].emplace_back(to, cost);
+	//	_clusters[cluster].push_back(_city_names.size());
+	//	_city_names.emplace_back(to_string(_city_names.size()), cluster);
+	//}
 
-	}
-
-	for (int j = 0; j < _cluster_count; ++j)
-	{
-		for (size_t i = 0; i < _city_count; ++i)
-		{
-			auto& edges = _edges[j][i];
-			sort(edges.begin(), edges.end(), [](const auto& a, const auto& b) -> bool
-			{
-				return a.second < b.second;
-			});
-		}
-	}
-
-	_start_city = 0;
-	_start_cluster = 0;
+	//_city_count = _city_names.size();
 
 
-	// cluster to cluster route initialization
+	//// create edges
 
-	_cluster_to_cluster_conflict.reserve(_cluster_count);
-	_cluster_to_cluster_cost.reserve(_cluster_count);
+	//_graph.reserve(_cluster_count);
+	//_edges.reserve(_cluster_count);
 
-	for (size_t d = 0; d < _cluster_count; ++d)
-	{
-		vector<vector<char>> conflict_sub_vector;
-		vector<vector<cost_t>> cost_sub_vector;
-		conflict_sub_vector.reserve(_cluster_count);
-		cost_sub_vector.reserve(_cluster_count);
+	//for (int j = 0; j < _cluster_count; ++j)
+	//{
+	//	vector<vector<cost_t>> b;
+	//	b.reserve(_city_count);
+	//	vector<vector<pair<city_id_t, cost_t>>> d;
+	//	d.reserve(_city_count);
+	//	for (size_t i = 0; i < _city_count; ++i)
+	//	{
+	//		vector<cost_t> c(_city_count, INVALID_ROUTE);
+	//		b.push_back(move(c));
+	//		vector<pair<city_id_t, cost_t>> e;
+	//		e.reserve(8);
+	//		d.push_back(move(e));
+	//	}
+	//	_graph.push_back(move(b));
+	//	_edges.push_back(move(d));
+	//}
 
-		for (size_t i = 0; i < _cluster_count; ++i)
-		{
-			vector<char> conflict_sub_sub_vector;
-			vector<cost_t> cost_sub_sub_vector;
-			conflict_sub_sub_vector.reserve(_cluster_count);
-			cost_sub_sub_vector.reserve(_cluster_count);
+	//for(size_t i = 0; i < cluster_count*city_count*average_branching; ++i)
+	//{
+	//	city_id_t from = rnd() % city_count;
+	//	city_id_t to = rnd() % city_count;
+	//	size_t day = rnd() % cluster_count;
+	//	int cost = (int)(normal_distribution(rnd) + 0.5f);
 
-			for (size_t j = 0; j < _cluster_count; ++j)
-			{
-				if (i == j)
-				{
-					conflict_sub_sub_vector.push_back(0);
-					cost_sub_sub_vector.push_back(0);
-					continue;
-				}
+	//	while(to == from) to = rnd() % city_count;
+	//	if (cost < 1) cost = 1;
 
-				cost_t min_cost = INVALID_ROUTE;
-				for (auto&& city_i : get_cluster_cities(i)) for (auto&& city_j : get_cluster_cities(j))
-				{
-					min_cost = min(min_cost, get_cost(city_i, city_j, d));
-				}
-				conflict_sub_sub_vector.push_back(min_cost == INVALID_ROUTE ? 1 : 0);
-				cost_sub_sub_vector.push_back(min_cost);
-			}
+	//	_graph[day][from][to] = min(cost_t(cost), _graph[day][from][to]);
+	//	if (_graph[day][from][to] == cost) _edges[day][from].emplace_back(to, cost);
 
-			conflict_sub_vector.push_back(move(conflict_sub_sub_vector));
-			cost_sub_vector.push_back(move(cost_sub_sub_vector));
-		}
+	//}
 
-		_cluster_to_cluster_conflict.push_back(move(conflict_sub_vector));
-		_cluster_to_cluster_cost.push_back(move(cost_sub_vector));
-	}
+	//for (int j = 0; j < _cluster_count; ++j)
+	//{
+	//	for (size_t i = 0; i < _city_count; ++i)
+	//	{
+	//		auto& edges = _edges[j][i];
+	//		sort(edges.begin(), edges.end(), [](const auto& a, const auto& b) -> bool
+	//		{
+	//			return a.second < b.second;
+	//		});
+	//	}
+	//}
+
+	//_start_city = 0;
+	//_start_cluster = 0;
+
+
+	//// cluster to cluster route initialization
+
+	//_cluster_to_cluster_conflict.reserve(_cluster_count);
+	//_cluster_to_cluster_cost.reserve(_cluster_count);
+
+	//for (size_t d = 0; d < _cluster_count; ++d)
+	//{
+	//	vector<vector<char>> conflict_sub_vector;
+	//	vector<vector<cost_t>> cost_sub_vector;
+	//	conflict_sub_vector.reserve(_cluster_count);
+	//	cost_sub_vector.reserve(_cluster_count);
+
+	//	for (size_t i = 0; i < _cluster_count; ++i)
+	//	{
+	//		vector<char> conflict_sub_sub_vector;
+	//		vector<cost_t> cost_sub_sub_vector;
+	//		conflict_sub_sub_vector.reserve(_cluster_count);
+	//		cost_sub_sub_vector.reserve(_cluster_count);
+
+	//		for (size_t j = 0; j < _cluster_count; ++j)
+	//		{
+	//			if (i == j)
+	//			{
+	//				conflict_sub_sub_vector.push_back(0);
+	//				cost_sub_sub_vector.push_back(0);
+	//				continue;
+	//			}
+
+	//			cost_t min_cost = INVALID_ROUTE;
+	//			for (auto&& city_i : get_cluster_cities(i)) for (auto&& city_j : get_cluster_cities(j))
+	//			{
+	//				min_cost = min(min_cost, get_cost(city_i, city_j, d));
+	//			}
+	//			conflict_sub_sub_vector.push_back(min_cost == INVALID_ROUTE ? 1 : 0);
+	//			cost_sub_sub_vector.push_back(min_cost);
+	//		}
+
+	//		conflict_sub_vector.push_back(move(conflict_sub_sub_vector));
+	//		cost_sub_vector.push_back(move(cost_sub_sub_vector));
+	//	}
+
+	//	_cluster_to_cluster_conflict.push_back(move(conflict_sub_vector));
+	//	_cluster_to_cluster_cost.push_back(move(cost_sub_vector));
+	//}
 }

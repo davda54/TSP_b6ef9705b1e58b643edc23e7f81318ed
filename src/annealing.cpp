@@ -42,7 +42,7 @@ void annealing::run(solution& s)
 #endif
 		}
 
-		if (new_energy < current_energy || acceptance_probability(current_energy, new_energy) > generator::rnd_float())
+		if (new_energy < current_energy || acceptance_probability(current_energy, new_energy, best_energy) > generator::rnd_float())
 		{
 			current_energy = new_energy;
 			s.submit_step();
@@ -65,7 +65,7 @@ void annealing::run(solution& s)
 	s.set_clusters(move(best_solution));
 }
 
-float annealing::acceptance_probability(energy_t current, energy_t next) const
+float annealing::acceptance_probability(energy_t current, energy_t next, energy_t best) const
 {
 	return (float) exp(-(float)(next - current) / _t);
 }

@@ -14,7 +14,7 @@ void test::check_performance()
 {
 	//check_performance("resources\\TSALESMAN2-1.in");
 	//check_performance("resources\\TSALESMAN2-2.in");
-	//check_performance("resources\\TSALESMAN2-3.in");
+	check_performance("resources\\TSALESMAN2-3.in");
 	check_performance("resources\\TSALESMAN2-4.in");
 	//check_performance(150, 200, 20, 1);
 	//check_performance(150, 200, 30, 2);
@@ -65,7 +65,7 @@ void test::run(task &t) {
 	double min_speed = std::numeric_limits<double>::max();
 	double max_speed = 0.0;
 
-	const size_t N = 2;
+	const size_t N = 5;
 
 	for (size_t i = 1; i <= N; ++i)
 	{
